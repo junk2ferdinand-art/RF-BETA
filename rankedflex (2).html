@@ -1,0 +1,2864 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Ranked Flex 1.0.3</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+:root{--bg:#0d1117;--panel:#11161d;--panel2:#161b22;--border:#30363d;--border2:#484f58;--text:#e6edf3;--muted:#8b949e;--blue:#4a9eff;--red:#ff4a4a;--green:#4ade80;--warn:#fbbf24;--s:#f59e0b;--a:#a78bfa;--b:#38bdf8;--c:#94a3b8;--curse:#d946ef}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding-bottom:80px}
+header{padding:12px max(18px,calc((100% - 1100px)/2));display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);background:var(--panel);flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50}
+main{max-width:1100px;margin:18px auto;padding:0 18px}
+.eyebrow{font-size:11px;letter-spacing:.18em;color:var(--muted)}
+h1{margin:2px 0;font-size:22px;letter-spacing:.08em}
+h2{margin-top:0;font-size:19px}
+h3{margin-bottom:8px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.muted{color:var(--muted)}
+.panel{border:1px solid var(--border);border-radius:14px;background:var(--panel);padding:20px;margin-bottom:16px;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:800px){.grid2{grid-template-columns:1fr}}
+label{display:block;margin:10px 0;color:var(--muted);font-size:13px}
+input,select{display:block;width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--border2);border-radius:9px;background:var(--bg);color:var(--text);font-size:15px}
+.checkrow{display:flex;align-items:center;gap:8px;margin:10px 0;color:var(--muted);font-size:13px}
+.checkrow input{width:auto;margin:0}
+button{border:1px solid var(--muted);background:var(--text);color:var(--bg);border-radius:9px;padding:10px 16px;font-weight:700;cursor:pointer;margin:4px 4px 4px 0;font-size:14px;transition:transform .1s,filter .1s;min-height:40px}
+button:hover:not(:disabled){filter:brightness(.92)}
+button:active:not(:disabled){transform:scale(.96)}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.secondary{background:#21262d;color:var(--text);border-color:var(--border2)}
+button.danger{background:#7f1d1d;color:#fecaca;border-color:#7f1d1d}
+button.good{background:#14532d;color:#d1fae5;border-color:#14532d}
+button.tiny{padding:5px 10px;font-size:12px;min-height:auto}
+.pill{padding:6px 12px;border-radius:999px;background:#21262d;color:var(--muted);font-size:12px}
+.ruling{padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--panel2);margin:6px 0;cursor:pointer;font-size:13px;transition:transform .1s,border-color .15s}
+.ruling:hover{border-color:var(--muted);transform:translateX(2px)}
+.ruling.selected{border-color:var(--blue);background:#1a2332}
+.ruling.easy{border-left:3px solid var(--green)}
+.ruling.moderate{border-left:3px solid var(--blue)}
+.ruling.hard{border-left:3px solid var(--a)}
+.ruling.insane{border-left:3px solid var(--red)}
+.ruling.curse{border-left:3px solid var(--curse)}
+.ruling b{display:block;margin-bottom:2px}
+.ruling small{color:var(--muted)}
+.tip{color:var(--warn);font-style:italic}
+.ruling small.tip{display:block;margin-top:4px}
+.towergrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.towergrid button{margin:0;text-align:left;background:var(--panel2);color:var(--text);border-color:var(--border);font-weight:400;padding:8px 10px;font-size:13px;min-height:auto}
+.towergrid button:disabled{opacity:.3;cursor:not-allowed}
+.towergrid button.picked{background:#1a3a1a;border-color:#2e7d32}
+.towergrid button.banned{background:#3a1a1a;border-color:#7d2e2e;text-decoration:line-through}
+.towergrid button.stier{border-left:3px solid var(--s)}
+.towergrid button.atier{border-left:3px solid var(--a)}
+.towergrid button.btier{border-left:3px solid var(--b)}
+.towergrid button.ctier{border-left:3px solid var(--c)}
+.loadout{border:1px solid var(--border);border-radius:10px;padding:10px;margin:6px 0;background:var(--bg)}
+.tower{display:inline-block;padding:4px 10px;background:#21262d;border-radius:7px;margin:3px;font-size:13px}
+.tower.pill-s{border-left:3px solid var(--s)}
+.tower.pill-a{border-left:3px solid var(--a)}
+.tower.pill-b{border-left:3px solid var(--b)}
+.tower.pill-c{border-left:3px solid var(--c)}
+.tower.pill-f{border-left:3px solid var(--green)}
+.tower.hidden{background:#3b2f5c;color:#a78bfa}
+.tower.protected{background:#14532d;border:1px solid var(--green)}
+.tower.marked{outline:2px dashed var(--warn)}
+.log{max-height:220px;overflow:auto;background:var(--bg);border-radius:9px;padding:10px;font-family:ui-monospace,monospace;font-size:12px;border:1px solid #21262d}
+.log div{padding:3px 0;border-bottom:1px solid var(--panel2)}
+.timer{font-family:ui-monospace,monospace;font-size:20px;font-weight:700;padding:6px 14px;border-radius:9px;background:#21262d;transition:background .3s,color .3s}
+.timer.warn{background:#78350f;color:var(--warn)}
+.timer.danger{background:#7f1d1d;color:#fecaca;animation:pulseRed 1s infinite}
+@keyframes pulseRed{0%,100%{opacity:1}50%{opacity:.7}}
+.modal{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;z-index:200;padding:20px;overflow-y:auto;animation:fadeIn .15s}
+.modal-inner{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:720px;width:100%;max-height:90vh;overflow-y:auto;animation:slideUp .2s}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
+.modal h3{color:var(--text);text-transform:none;letter-spacing:0;font-size:18px;margin-top:0}
+.toast{position:fixed;top:70px;right:20px;background:var(--panel);border:1px solid var(--border);border-left:4px solid var(--blue);border-radius:10px;padding:12px 16px;max-width:340px;z-index:150;box-shadow:0 8px 32px #0008;font-size:13px;animation:slideIn .25s}
+@keyframes slideIn{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
+.toast.warn{border-left-color:var(--warn)}
+.toast.danger{border-left-color:var(--red)}
+.toast.good{border-left-color:var(--green)}
+.roomcode{font-family:ui-monospace,monospace;font-size:24px;letter-spacing:.15em;background:#21262d;padding:10px 16px;border-radius:9px;display:inline-block;margin:10px 0}
+footer{position:fixed;bottom:0;left:0;right:0;background:var(--panel);border-top:1px solid var(--border);padding:10px max(18px,calc((100% - 1100px)/2));font-size:12px;color:var(--muted);z-index:40}
+.center{text-align:center}
+.win{color:var(--green);font-weight:700;font-size:24px;animation:bounceIn .5s}
+.loss{color:var(--red);font-weight:700;font-size:24px;animation:bounceIn .5s}
+@keyframes bounceIn{0%{transform:scale(.7);opacity:0}60%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+.safenote{font-size:12px;color:var(--warn);background:#2a2110;border:1px solid #4a3a12;border-radius:7px;padding:6px 10px;margin:6px 0 10px;font-weight:600}
+.removeline{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;margin-top:10px}
+.needs{color:var(--warn);font-size:12px;font-weight:600}
+#chatWrap h3{margin-top:14px}
+.emoteRow{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.emoteRow button{margin:0;padding:6px 8px;font-size:18px;background:var(--panel2);color:var(--text);border-color:var(--border);font-weight:400;min-height:auto}
+.thinking{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-left:6px;animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+.statusbanner{background:#4a2a10;border:1px solid #7a4a12;border-radius:7px;padding:6px 10px;margin:8px 0;font-size:12px;color:var(--warn);font-weight:600}
+.counterRow{display:flex;gap:8px;flex-wrap:wrap;font-size:11px;margin:8px 0}
+.counterChip{background:#21262d;border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-family:ui-monospace,monospace;letter-spacing:.03em}
+.counterChip.full{background:#3a1a1a;border-color:#7d2e2e;color:#fecaca}
+.counterChip.ok{background:#14532d22;border-color:#2e7d32;color:#a7f3d0}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="eyebrow">EVEVIUS · FAN-MADE · v1.0.3</div>
+    <h1>RANKED FLEX</h1>
+  </div>
+  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+    <div class="pill" id="phaseBadge">Setup</div>
+    <div class="pill" id="connBadge" hidden></div>
+    <button class="tiny" id="btnSound">🔊</button>
+    <button class="tiny" id="btnHelp">❓</button>
+    <button class="tiny" id="btnProfile">👤</button>
+  </div>
+</header>
+<main>
+  <section id="s-landing" class="panel">
+    <h2>New Match</h2>
+    <div class="grid2">
+      <div>
+        <h3>Offline (one device)</h3>
+        <p class="safenote">Casual only — does not affect ranked MMR.</p>
+        <label>Player 1 name<input id="p1name" value="Blue" maxlength="20"></label>
+        <label>Player 2 name<input id="p2name" value="Red" maxlength="20"></label>
+        <label>Draft type
+          <select id="draftType">
+            <option value="Open">Open — 1 pick/turn × 4 turns</option>
+            <option value="Close">Close — 2 picks/turn × 2 turns</option>
+          </select>
+        </label>
+        <button id="btnOffline" class="good">Start Offline Match</button>
+      </div>
+      <div>
+        <h3>Online (two devices) — Unverified</h3>
+        <p class="safenote">Honor-system reports. Does not affect official ranked MMR.</p>
+        <p class="muted" style="font-size:13px" id="onlineHint">Requires HTTPS.</p>
+        <label>Your name<input id="myName" value="Player" maxlength="20"></label>
+        <label>Draft type
+          <select id="onlineDraftType">
+            <option value="Open">Open — 1 pick/turn × 4 turns</option>
+            <option value="Close">Close — 2 picks/turn × 2 turns</option>
+          </select>
+        </label>
+        <div class="checkrow">
+          <input type="checkbox" id="unrankedToggle">
+          <label for="unrankedToggle" style="margin:0">Unranked — no MMR changes</label>
+        </div>
+        <button id="btnCreateOnline">Create Room</button>
+        <label>Or join with code:<input id="joinCode" placeholder="ABC123" maxlength="6" style="text-transform:uppercase"></label>
+        <button id="btnJoinOnline" class="secondary">Join Room</button>
+        <div id="onlineStatus" class="muted" style="font-size:13px;margin-top:10px"></div>
+      </div>
+    </div>
+    <div id="landingStats" style="margin-top:20px"></div>
+  </section>
+  <section id="s-waiting" class="panel" hidden>
+    <h2>Waiting for opponent</h2>
+    <div class="center" style="padding:20px 0">
+      <p>Share this room code:</p>
+      <div class="roomcode" id="roomCodeDisplay">------</div>
+      <div>
+        <button id="btnCopyCode" class="tiny">Copy Code</button>
+        <button id="btnCopyLink" class="tiny secondary">Copy Link</button>
+      </div>
+      <p class="muted" id="waitStatus" style="margin-top:20px">Waiting…</p>
+      <button id="btnCancelWait" class="danger tiny" style="margin-top:12px">Cancel</button>
+    </div>
+  </section>
+  <section id="s-coin" class="panel" hidden>
+    <h2>Coinflip</h2>
+    <div class="center" style="padding:20px 0">
+      <div id="coinResult" class="muted" style="font-size:18px;margin-bottom:16px">Awaiting both players…</div>
+      <button id="btnFlip" style="font-size:18px;padding:14px 32px">Flip Coin</button>
+      <div id="choiceBox" hidden style="margin-top:24px">
+        <div style="margin-bottom:12px"><b id="winnerName"></b>, choose your position:</div>
+        <button data-choice="first">First Pick</button>
+        <button data-choice="second" class="secondary">Second Pick</button>
+      </div>
+    </div>
+  </section>
+  <section id="s-config" class="panel" hidden>
+    <h2>Configuration</h2>
+    <p class="muted" style="font-size:13px">Both players confirm the ruleset before the ban phase.</p>
+    <div class="loadout" style="font-size:13px">
+      <div><b>Mode:</b> <span id="cfgMode"></span></div>
+      <div><b>Draft type:</b> <span id="cfgDraftType"></span></div>
+      <div><b>Farm:</b> mandatory, untargetable (auto-added)</div>
+      <div><b>Ruling slots:</b> 3 per player, 20 points</div>
+      <div><b>Ban phase:</b> 1 tower per player</div>
+      <div><b>Removal cap:</b> 1 per player</div>
+      <div><b>Protection cap:</b> 2 per player</div>
+      <div><b>Hidden cap:</b> 2 per player</div>
+    </div>
+    <button id="btnConfirmConfig" class="good">Confirm Configuration</button>
+    <div id="configConfirmStatus" class="muted" style="font-size:13px;margin-top:10px"></div>
+  </section>
+  <section id="s-ban" class="panel" hidden>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+      <h2 style="margin:0">Tower Ban</h2>
+      <div class="timer" id="banTimer">30</div>
+    </div>
+    <p class="muted">Each player bans 1 tower. Banned towers are removed from the pool permanently.</p>
+    <div class="grid2">
+      <div class="loadout"><b>Your Ban:</b><div id="banYourChoice" class="muted">Not chosen</div></div>
+      <div class="loadout"><b>Opponent's Ban:</b><div id="banOppChoice" class="muted">Waiting…</div></div>
+    </div>
+    <h3>Tower Pool</h3>
+    <div id="banGrid" class="towergrid"></div>
+  </section>
+  <section id="s-rulings" class="panel" hidden>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+      <h2 style="margin:0">Ruling Selection</h2>
+      <div class="timer" id="rulingTimer">90</div>
+    </div>
+    <div class="grid2">
+      <div>
+        <h3>Available <span class="pill" id="rulingCount">0</span></h3>
+        <div id="rulingsList" style="max-height:520px;overflow-y:auto"></div>
+      </div>
+      <div>
+        <h3>Your Portfolio</h3>
+        <div class="loadout">
+          <div><b>Selected:</b> <span id="selList">None</span></div>
+          <div><b>Spent:</b> <span id="spentList">None</span></div>
+          <div><b>Points:</b> <span id="selCost">0</span> / 15</div>
+          <div><b>Slots:</b> <span id="selSlots">0</span> / 3</div>
+        </div>
+        <button id="btnUndo" class="secondary">Undo</button>
+        <button id="btnReset" class="secondary">Reset</button>
+        <button id="btnSaveBuild" class="secondary">Save</button>
+        <button id="btnLoadBuild" class="secondary">Load</button>
+        <button id="btnQuickStart" class="secondary">Quick Start</button>
+        <button id="btnLock" class="good">Lock Portfolio</button>
+        <div id="rulingLockStatus" class="muted" style="font-size:13px;margin-top:10px"></div>
+      </div>
+    </div>
+  </section>
+  <section id="s-reveal" class="panel" hidden>
+    <h2>Ruling Reveal</h2>
+    <p class="muted">Your rulings and your opponent's rulings are now public knowledge for the rest of the match.</p>
+    <div class="grid2">
+      <div class="loadout"><b id="revP1Name"></b><div id="revP1Rulings"></div></div>
+      <div class="loadout"><b id="revP2Name"></b><div id="revP2Rulings"></div></div>
+    </div>
+    <button id="btnBeginDraft" class="good">Begin Draft</button>
+  </section>
+  <section id="s-draft" class="panel" hidden>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px">
+      <div>
+        <h2 style="margin:0">Tower Draft</h2>
+        <div class="muted" id="turnLabel" style="font-size:13px"></div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="pill" id="priorityBadge">—</div>
+        <div class="timer" id="draftTimer">30</div>
+      </div>
+    </div>
+    <div id="statusBanners"></div>
+    <div id="counterRow" class="counterRow"></div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;font-size:13px">
+      <div><b id="scoreP1Name"></b>: <span id="scoreP1">0</span></div>
+      <div><b id="scoreP2Name"></b>: <span id="scoreP2">0</span></div>
+      <div style="margin-left:auto">
+        <button id="btnConcede" class="danger tiny">🏳 Concede</button>
+        <button id="btnAbort" class="danger tiny">✕ Abort</button>
+      </div>
+    </div>
+    <div id="removedWrap"></div>
+    <div class="grid2" style="margin-top:14px">
+      <div>
+        <h3>Tower Pool</h3>
+        <div id="towerGrid" class="towergrid"></div>
+      </div>
+      <div>
+        <h3>Loadouts</h3>
+        <div id="loadoutWrap"></div>
+        <h3>Your Rulings</h3>
+        <div id="rulingButtons"></div>
+        <h3>Match Log</h3>
+        <div id="log" class="log"></div>
+        <div id="chatWrap" hidden>
+          <h3>Chat</h3>
+          <div id="chatLog" class="log" style="max-height:140px"></div>
+          <div class="emoteRow" id="emoteRow"></div>
+          <div style="display:flex;gap:6px;margin-top:6px">
+            <input id="chatInput" placeholder="Type a message…" maxlength="200" inputmode="text" autocomplete="off" style="flex:1;margin:0">
+            <button id="btnSendChat" class="tiny">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="s-handoff" class="panel" hidden>
+    <h2>Play the Match on Roblox</h2>
+    <div style="padding:10px 0">
+      <p class="muted" style="max-width:680px;margin:0 auto 14px;text-align:center">Draft complete. Play Tower Battles 1v1 on Roblox, then report the result.</p>
+      <div class="loadout" style="text-align:left;max-width:680px;margin:14px auto">
+        <div><b>Your loadout:</b></div>
+        <div id="handoffYour"></div>
+        <div style="margin-top:10px"><b>Opponent's loadout:</b></div>
+        <div id="handoffOpp"></div>
+      </div>
+      <div style="background:#3a1a1a;border-left:3px solid var(--warn);padding:10px;border-radius:6px;margin:12px auto;font-size:12px;color:var(--warn);max-width:680px">
+        ⚠ <b>Technical rule:</b> technical matches do not affect MMR. Use only for crashes, disconnects, lobby failures, or if a player places no towers.
+      </div>
+      <div class="safenote" id="handoffModeNote" style="max-width:680px;margin:8px auto;text-align:center"></div>
+      <div style="text-align:center;margin-top:16px">
+        <a href="https://www.roblox.com/games/4328953717/" target="_blank" rel="noopener" style="text-decoration:none">
+          <button class="good">Open Tower Battles on Roblox</button>
+        </a>
+      </div>
+      <div style="text-align:center;margin-top:14px">
+        <button id="btnHandoffReady" class="good">I'm Ready — Draft Complete</button>
+      </div>
+      <div id="handoffStatus" class="muted" style="margin-top:10px;font-size:13px;text-align:center"></div>
+    </div>
+  </section>
+  <section id="s-result" class="panel" hidden>
+    <h2>Report Result</h2>
+    <p class="muted">Both players report independently. Disagreement = voided match.</p>
+    <p class="safenote" id="resultModeNote"></p>
+    <div class="loadout">
+      <div><b>Your loadout:</b> <span id="resultYour"></span></div>
+      <div><b>Opponent:</b> <span id="resultOpp"></span></div>
+      <div style="margin-top:8px"><b>Towers drafted:</b> <span id="resultScore"></span></div>
+    </div>
+    <div style="margin:16px 0">
+      <button id="btnResultWin" class="good">I Won</button>
+      <button id="btnResultLoss" class="danger">I Lost</button>
+      <button id="btnResultTech" class="secondary">Technical / Void</button>
+    </div>
+    <div id="resultStatus" class="muted"></div>
+    <div id="resultCountdown" class="safenote" style="display:none"></div>
+  </section>
+  <section id="s-final" class="panel" hidden>
+    <h2>Match Complete</h2>
+    <div id="winnerBox" class="center" style="margin:20px 0"></div>
+    <div id="mmrDelta" class="center" style="margin:20px 0"></div>
+    <div id="draftRecapBox"></div>
+    <h3>Match Log</h3>
+    <div id="finalLog" class="log" style="max-height:280px"></div>
+    <div style="margin-top:16px">
+      <button id="btnRematch">Rematch</button>
+      <button id="btnNewMatch" class="secondary">New Match</button>
+    </div>
+  </section>
+</main>
+<footer>
+  <div><b>Ranked Flex 1.0.3</b> · 50 rulings · Fan-made by Evevius. Not affiliated with Planet3arth, Roblox Corporation, or Tower Battles.</div>
+</footer>
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = x => String(x).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+function sanitizeName(raw, fallback) {
+  let n = String(raw == null ? "" : raw).replace(/[\u0000-\u001F\u007F<>`]/g, "").trim().slice(0,20).trim();
+  return n || fallback;
+}
+function dedupeName(name, other) {
+  if (name !== other) return name;
+  return name.slice(0,17) + " (2)";
+}
+const now = () => Date.now();
+const randHex = n => Array.from(crypto.getRandomValues(new Uint8Array(n))).map(b => b.toString(16).padStart(2,"0")).join("");
+const randInt = n => { if (n <= 0) return 0; const a = new Uint8Array(4); crypto.getRandomValues(a); return (((a[0]<<24)|(a[1]<<16)|(a[2]<<8)|a[3])>>>0) % n; };
+const sha256 = async s => {
+  const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(h)).map(b => b.toString(16).padStart(2,"0")).join("");
+};
+// Synchronous non-crypto hash (FNV-1a 32-bit + length salt).
+// Used for coin commit/reveal verification because applyAction() is sync.
+function syncHash(str) {
+  let h = 0x811c9dc5;
+  const s = String(str);
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = (h * 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, "0") + ":" + s.length;
+}
+const Sound = (() => {
+  let ctx = null;
+  let enabled = true;
+  const stored = localStorage.getItem("rf_sound");
+  if (stored === "off") enabled = false;
+  function ensure() {
+    if (!ctx) {
+      try { ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch(e) { enabled = false; }
+    }
+    if (ctx && ctx.state === "suspended") ctx.resume().catch(()=>{});
+    return ctx;
+  }
+  function tone(freq, dur, type="sine", vol=0.08) {
+    if (!enabled) return;
+    const c = ensure(); if (!c) return;
+    const o = c.createOscillator();
+    const g = c.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
+    o.connect(g); g.connect(c.destination);
+    o.start(); o.stop(c.currentTime + dur);
+  }
+  function chord(freqs, dur, type="sine", vol=0.06) { freqs.forEach(f => tone(f, dur, type, vol)); }
+  return {
+    get enabled() { return enabled; },
+    toggle() { enabled = !enabled; localStorage.setItem("rf_sound", enabled ? "on" : "off"); return enabled; },
+    unlock() { ensure(); },
+    click() { tone(660, 0.05, "square", 0.04); },
+    pick() { tone(880, 0.1, "triangle", 0.07); setTimeout(()=>tone(1100, 0.08, "triangle", 0.06), 60); },
+    warn() { tone(330, 0.15, "sawtooth", 0.05); },
+    error() { tone(220, 0.2, "sawtooth", 0.07); },
+    turn() { chord([523, 659, 784], 0.25, "sine", 0.05); },
+    opponent() { tone(440, 0.12, "sine", 0.05); setTimeout(()=>tone(587, 0.12, "sine", 0.05), 110); },
+    win() { [523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,0.25,"triangle",0.08), i*100)); },
+    lose() { [392,349,294,233].forEach((f,i)=>setTimeout(()=>tone(f,0.25,"triangle",0.07), i*120)); },
+    ban() { tone(180, 0.3, "sawtooth", 0.06); setTimeout(()=>tone(120, 0.4, "sawtooth", 0.05), 150); },
+    reveal() { chord([440,554,659], 0.4, "sine", 0.06); },
+    coin() { tone(1500, 0.06, "square", 0.05); setTimeout(()=>tone(1800, 0.06, "square", 0.04), 80); setTimeout(()=>tone(2100, 0.1, "square", 0.05), 160); },
+    chat() { tone(2000, 0.05, "sine", 0.03); }
+  };
+})();
+function toast(msg, kind="") {
+  const el = document.createElement("div");
+  el.className = "toast " + kind;
+  el.textContent = msg;
+  $("#toastRoot").appendChild(el);
+  setTimeout(() => el.remove(), 4200);
+}
+function modal(title, bodyHtml, actions=[]) {
+  const root = $("#modalRoot");
+  root.innerHTML = `<div class="modal"><div class="modal-inner"><h3>${esc(title)}</h3><div>${bodyHtml}</div><div style="margin-top:16px" id="modalActions"></div></div></div>`;
+  const act = root.querySelector("#modalActions");
+  actions.forEach(a => {
+    const b = document.createElement("button");
+    b.textContent = a.label;
+    if (a.kind) b.className = a.kind;
+    b.onclick = () => { a.onClick && a.onClick(); if (a.close !== false) root.innerHTML = ""; };
+    act.appendChild(b);
+  });
+  root.querySelector(".modal").addEventListener("click", e => { if (e.target.classList.contains("modal")) root.innerHTML = ""; });
+}
+const TIERS = {
+  S: ["Commander","DJ","Railgunner","Zed","Golden Commando"],
+  A: ["Marksman","Sniper","Shotgunner","Commando","Plasma Trooper","Red Sniper","Cryo-Gunner","Golden Scout","Sleeter","Phaser"],
+  B: ["Mortar","Scarecrow","Anarchist","Fragger","Soldier","Tuber","Patrol","Enforcer","Barracks","Aviator","Flamethrower","Mercenary","Stunner","Huntsman","Tweeter","Graveyard","Snowballer","Harpoon Hunter","Patrioteer"],
+  C: ["Scout","Knifer","Ice Cream","Archer","Hallowboomer","Red Scout","Elf"]
+};
+const FARM = "Farm";
+const TOWERS = [...TIERS.S, ...TIERS.A, ...TIERS.B, ...TIERS.C];
+const towerTier = t => t === FARM ? "F" : (Object.keys(TIERS).find(k => TIERS[k].includes(t)) || "C");
+const TIER_RANK = { S:4, A:3, B:2, C:1, F:0 };
+const isFarm = t => t === FARM || (t && t.name === FARM);
+const RULINGS = {
+  Pass:       { tier:"Easy",     cost:1,  desc:"Skip the rest of your picks this turn; bank them for next turn.", tip:"Use it when you're out of good picks — bank the turn instead of wasting it." },
+  Change:     { tier:"Easy",     cost:1,  desc:"Replace one of your own towers (returns to the pool).", tip:"Swap out a pick that got out-valued once the pool shifted." },
+  Bounty:     { tier:"Easy",     cost:1,  desc:"Reveal a hidden opponent tower OR refund one of your own spent rulings.", tip:"Flexible early pick — scout a hidden tower or get a cheap refund, your call." },
+  Peek:       { tier:"Easy",     cost:1,  desc:"Secretly reveal one hidden opponent tower to yourself only.", tip:"Use before deciding your pick order — see a hidden tower without tipping them off." },
+  Revive:     { tier:"Easy",     cost:1,  desc:"Return a deleted tower to the pool.", tip:"Bring back a deleted tower right before you'd pick it anyway." },
+  Probe:      { tier:"Easy",     cost:2,  desc:"Permanently reveal one hidden pick (opponent is notified).", tip:"Use when a hidden tower is messing with your planning — force it into the open." },
+  Hide:       { tier:"Easy",     cost:2,  desc:"Conceal one of your picks. Max 2 hidden.", tip:"Protect your best pick right after drafting it, before they can target it." },
+  Turn:       { tier:"Easy",     cost:2,  desc:"Take an extra pick immediately. Not in Close draft.", tip:"Take it when you're ahead on tempo and want to snowball picks." },
+  Delay:      { tier:"Easy",     cost:2,  desc:"Halve opponent's next turn timer.", tip:"Use right before a close turn to rush your opponent into a mistake." },
+  Mark:       { tier:"Easy",     cost:2,  desc:"Remove hidden and protection from one opponent tower this round.", tip:"Use on a hidden, protected tower you want to hit with removal next turn." },
+  Shift:      { tier:"Moderate", cost:3,  desc:"Swap one of your towers for a different tower of the same tier.", tip:"Use when your tower got outclassed but you don't want to drop a tier." },
+  Cloak:      { tier:"Moderate", cost:3,  desc:"Conceal one pick silently — opponent sees no log.", tip:"Use when you don't want your opponent adjusting their plan around your pick." },
+  Rebel:      { tier:"Moderate", cost:3,  desc:"Reverse opponent's most recent Steal.", tip:"Only useful right after they Steal from you — otherwise it's dead weight in your hand." },
+  Recall:     { tier:"Moderate", cost:3,  desc:"Recover any evicted tower you don't currently own.", tip:"Grab back a tower you lost to Evict before someone else takes it." },
+  Mirror:     { tier:"Moderate", cost:3,  desc:"Copy opponent's most recent pick if still in pool.", tip:"Copy their pick right away — waiting a turn might let it get taken." },
+  Ward:       { tier:"Moderate", cost:4,  desc:"Your next ruling cannot be Veto'd or Silenced.", tip:"Play it right before a ruling you really don't want cancelled." },
+  Freeze:     { tier:"Moderate", cost:4,  desc:"Block a ruling type for 1 round. Close draft only.", tip:"Shut down a ruling type you know they're saving up for." },
+  Secure:     { tier:"Moderate", cost:4,  desc:"Protect one tower from removal for 2 rounds.", tip:"Protect a key tower for a couple rounds while you set up elsewhere." },
+  Riposte:    { tier:"Moderate", cost:4,  desc:"Negate the next removal ruling against you this round.", tip:"Play it when you expect removal (Strip, Evict, Steal) coming your way." },
+  Fracture:   { tier:"Moderate", cost:4,  desc:"Crack one of your S-tier towers down to A-tier, freeing your S-slot.", tip:"Free up your S-slot without losing the tower completely." },
+  Split:      { tier:"Hard",     cost:5,  desc:"Split one S-tier tower into two A/B/C-tier towers.", tip:"Turn one big tower into two solid ones — good when you need more coverage." },
+  Duplicate:  { tier:"Hard",     cost:5,  desc:"Copy one of your own non-S towers (must still be in pool).", tip:"Use on your strongest non-S tower to double down on what's working." },
+  Anchor:     { tier:"Hard",     cost:5,  desc:"Permanently protect one tower. Max 2 protected.", tip:"Lock down your two best towers so nothing can remove them." },
+  Echo:       { tier:"Hard",     cost:5,  desc:"Copy the effect of your own last-used ruling.", tip:"Use right after a strong ruling to get its effect twice in a row." },
+  Inspect:    { tier:"Hard",     cost:5,  desc:"Permanently reveal all opponent hidden towers. They cannot hide again.", tip:"Use when they've been hiding a lot — strip that advantage for good." },
+  Graft:      { tier:"Hard",     cost:6,  desc:"Copy last ruling used by anyone. Not Graft-on-Graft, not Veto.", tip:"Copy whatever powerful ruling was just used, even if it was your opponent's." },
+  Trade:      { tier:"Hard",     cost:6,  desc:"Swap a non-hidden unprotected tower for a known opponent tower.", tip:"Swap a spare tower for something you actually want from their side." },
+  Fuse:       { tier:"Hard",     cost:6,  desc:"Merge two of your non-S towers into one S-tier. Max 1.", tip:"Combine two decent towers into an S-tier — good late-game power spike." },
+  Haven:      { tier:"Hard",     cost:6,  desc:"Shield every tower you own from removal this round.", tip:"Use before a round where you expect heavy removal coming at you." },
+  Force:      { tier:"Hard",     cost:6,  desc:"Force opponent's next pick to a specific tower. Open only.", tip:"Only in Open drafts — steer their next pick somewhere useless for them." },
+  Ascend:     { tier:"Insane",   cost:7,  desc:"Transform your lowest-tier tower into any S-tier still in pool.", tip:"Use late, when your weakest tower is dragging your loadout down." },
+  Doom:       { tier:"Insane",   cost:7,  desc:"Opponent immediately loses their highest-tier tower.", tip:"Save it for when they have one clear best tower to knock out." },
+  Evict:      { tier:"Insane",   cost:7,  desc:"Remove a known tower. Counts toward removal cap.", tip:"Remove a tower you know they're relying on — it's permanent, so pick carefully." },
+  Dictate:    { tier:"Insane",   cost:7,  desc:"Choose opponent's next pick for them (any legal tower).", tip:"Force a bad pick on them when the pool is thin on good options." },
+  Martyr:     { tier:"Insane",   cost:7,  desc:"Give up one tower to permanently protect all others. Max 1.", tip:"Worth it when you have one weak tower and want the rest untouchable." },
+  Ruin:       { tier:"Insane",   cost:8,  desc:"Opponent loses their two highest-tier towers.", tip:"Big tempo swing — use when they're leaning hard on two strong towers." },
+  Amnesty:    { tier:"Insane",   cost:8,  desc:"Both players regain their spent rulings up to their 3-slot cap.", tip:"Use when you're both low on rulings and you want more options back." },
+  Purge:      { tier:"Insane",   cost:8,  desc:"Opponent loses every unprotected non-Farm tower. They may re-pick.", tip:"The nuclear option — best when they're stacked and you're behind." },
+  Delete:     { tier:"Insane",   cost:8,  desc:"Remove a tower from pool permanently. Max 1. Uses removal cap.", tip:"Take their best pick out of the pool before they even get to see it." },
+  Steal:      { tier:"Insane",   cost:8,  desc:"Take opponent's known tower. Uses removal cap.", tip:"Take a tower you know is strong instead of hoping to draft it yourself." },
+  Strip:      { tier:"Curse",    cost:9,  desc:"Opponent discards a random unused ruling.", tip:"Use when they're holding a big ruling — force a random discard and hope it hits." },
+  Snatch:     { tier:"Curse",    cost:9,  desc:"Take one unused ruling from opponent.", tip:"Take a specific ruling you know they're saving for later." },
+  Salvage:    { tier:"Curse",    cost:9,  desc:"Refund one of your own spent ruling uses.", tip:"Get back a ruling you already used for a second shot at it." },
+  Extort:     { tier:"Curse",    cost:9,  desc:"Look at opponent's hand and force them to discard a ruling you choose.", tip:"Use when you want to see their hand and cut their best option yourself." },
+  Jinx:       { tier:"Curse",    cost:9,  desc:"Curse: opponent discards a random ruling whenever they use one.", tip:"Long-game pressure — every ruling they use afterward costs them extra." },
+  Silence:    { tier:"Curse",    cost:10, desc:"Opponent cannot use rulings on their next turn. Max 1.", tip:"Use right before a turn where you expect them to try to counter you." },
+  Plunder:    { tier:"Curse",    cost:10, desc:"Steal a known opponent tower AND plant a non-S tower of yours into their loadout.", tip:"Take their tower and dump a weak one on them at the same time." },
+  Veto:       { tier:"Curse",    cost:10, desc:"Cancel an opponent ruling. Cannot be Veto'd. Max 1.", tip:"Save this for their scariest ruling — it's a one-time answer, don't waste it." },
+  Pact:       { tier:"Curse",    cost:10, desc:"Both players discard their highest-cost unused ruling.", tip:"Use when you're both holding expensive rulings you'd rather see gone." },
+  Clarity:    { tier:"Curse",    cost:10, desc:"All hidden towers become visible for the rest of the match.", tip:"Use when hiding has been giving them too much of an edge." }
+};
+const RULING_ORDER = Object.keys(RULINGS);
+const CAPS = {
+  points:20, slots:3, towers:4, removals:1, protected:2, hidden:2, bans:1,
+  veto:1, delete:1, martyr:1, silence:1, doom:1, pact:1, fuse:1, split:1,
+  ascend:1, ruin:1, amnesty:1, purge:1, jinx:1, echo:1, haven:1
+};
+const RENAME_MAP = {
+  Downgrade:"Fracture", Blight:"Jinx",    Sanctuary:"Haven", Lockdown:"Silence",
+  Oblivion:"Ruin",      Cataclysm:"Amnesty", Apocalypse:"Purge",
+  Subvert:"Dictate",    Transmute:"Shift", Redirect:"Salvage", Sabotage:"Strip",
+  Sacrifice:"Martyr",   Morph:"Shift",     Usurp:"Dictate",    Reclaim:"Salvage",
+  Rearm:"Salvage",      Hex:"Jinx",        Ban:"Delete",       Disarm:"Strip"
+};
+const STARTER_BUILDS = [
+  { name:"Foundational Defense", rulings:["Anchor","Haven","Riposte"] },
+  { name:"Removal Assault",      rulings:["Evict","Silence","Mark"] },
+  { name:"Information Play",     rulings:["Peek","Inspect","Anchor"] },
+  { name:"Resource Economy",     rulings:["Salvage","Amnesty","Fracture"] },
+  { name:"Board Control",        rulings:["Silence","Dictate","Delay"] },
+  { name:"Late Game Burst",      rulings:["Purge","Haven","Fracture"] }
+];
+const EMOTES = ["😍","🥺","🤣","😭","🤨","😈","🤮","😠","😇","😨","🥵","😎","😱"];
+const RANKS = [
+  { name:"Bronze",min:0,max:999,icon:"🥉" },
+  { name:"Silver",min:1000,max:1499,icon:"🥈" },
+  { name:"Gold",min:1500,max:1999,icon:"🥇" },
+  { name:"Platinum",min:2000,max:2499,icon:"💎" },
+  { name:"Diamond",min:2500,max:999999,icon:"💠" }
+];
+const getRank = mmr => RANKS.find(r => mmr >= r.min && mmr <= r.max) || RANKS[0];
+const Store = {
+  KEY: "rf_1_0_",
+  get(k, fb) { try { const v = localStorage.getItem(this.KEY + k); return v ? JSON.parse(v) : fb; } catch(e) { return fb; } },
+  set(k, v) { try { localStorage.setItem(this.KEY + k, JSON.stringify(v)); } catch(e){} }
+};
+const Player = {
+  load() {
+    const p = Store.get("player", null);
+    const def = { v:1,
+      offline:{wins:0,losses:0,techVoid:0,matches:0},
+      online:{wins:0,losses:0,techVoid:0,matches:0,mmr:1000,peakMmr:1000,streak:0,bestStreak:0,placementsLeft:10} };
+    if (!p || p.v !== 1) return def;
+    return { ...def, ...p, offline:{...def.offline,...p.offline}, online:{...def.online,...p.online} };
+  },
+  save(p) { p.v = 1; Store.set("player", p); },
+  reset() {
+    const def = { v:1,
+      offline:{wins:0,losses:0,techVoid:0,matches:0},
+      online:{wins:0,losses:0,techVoid:0,matches:0,mmr:1000,peakMmr:1000,streak:0,bestStreak:0,placementsLeft:10} };
+    this.save(def); return def;
+  },
+  record(mode, result, oppMmr = 1000, unranked = false) {
+    const p = this.load();
+    const bucket = mode === "online" ? p.online : p.offline;
+    let delta = 0, before = null, after = null, beforeTier = null, afterTier = null, promoted = false, demoted = false;
+    if (result === "void") { this.save(p); return { mode, delta:0, before:null, after:null, beforeTier:null, afterTier:null, promoted:false, demoted:false }; }
+    if (unranked && mode === "online") {
+      this.save(p);
+      return { mode, delta:0, before:null, after:null, beforeTier:null, afterTier:null, promoted:false, demoted:false, unranked:true };
+    }
+    bucket.matches++;
+    if (result === "win" || result === "loss") {
+      bucket[result === "win" ? "wins" : "losses"]++;
+      if (mode === "online") {
+        before = bucket.mmr; beforeTier = getRank(before).name;
+        const expected = 1 / (1 + Math.pow(10, (oppMmr - bucket.mmr) / 400));
+        let K = 32; if (bucket.matches < 10) K = 40; else if (bucket.matches > 50) K = 24;
+        delta = result === "win" ? Math.round(K*(1-expected)) : Math.round(K*(0-expected));
+        bucket.mmr = Math.max(0, bucket.mmr + delta);
+        bucket.peakMmr = Math.max(bucket.peakMmr, bucket.mmr);
+        after = bucket.mmr; afterTier = getRank(after).name;
+        promoted = afterTier !== beforeTier && after > before;
+        demoted = afterTier !== beforeTier && after < before;
+        if (result === "win") { bucket.streak++; bucket.bestStreak = Math.max(bucket.bestStreak, bucket.streak); }
+        else bucket.streak = 0;
+        if (bucket.placementsLeft > 0) bucket.placementsLeft--;
+      }
+    } else bucket.techVoid++;
+    this.save(p);
+    return { mode, delta, before, after, beforeTier, afterTier, promoted, demoted };
+  }
+};
+function experienceLevel() {
+  const p = Player.load();
+  return (p.online.matches || 0) + (p.offline.matches || 0);
+}
+const Builds = {
+  load() {
+    const b = Store.get("builds", []);
+    if (!Array.isArray(b)) return [];
+    return b.map(build => ({
+      ...build,
+      rulings: Array.isArray(build.rulings) ? build.rulings.map(r => RENAME_MAP[r] || r) : []
+    }));
+  },
+  save(b) { Store.set("builds", b.slice(0, 50)); },
+  add(name, rulings) { const b = this.load(); b.unshift({ id:now(), name:String(name).slice(0,30), rulings }); this.save(b); },
+  validate(build) {
+    if (!build || !Array.isArray(build.rulings)) return { ok:false, reason:"Malformed" };
+    let cost = 0; const seen = {};
+    for (let r of build.rulings) {
+      r = RENAME_MAP[r] || r;
+      if (!RULINGS[r]) return { ok:false, reason:"Unknown ruling " + r };
+      cost += RULINGS[r].cost;
+      seen[r] = (seen[r] || 0) + 1;
+    }
+    if (cost > CAPS.points) return { ok:false, reason:"Cost " + cost + " > " + CAPS.points };
+    if (build.rulings.length > CAPS.slots) return { ok:false, reason:"Slots exceeded" };
+    const capped = ["Veto","Delete","Martyr","Silence","Doom","Pact","Fuse","Split","Ascend","Ruin","Amnesty","Purge","Jinx","Echo","Haven"];
+    for (const r of capped) {
+      if (seen[r] > (CAPS[r.toLowerCase()] || 1)) return { ok:false, reason:`Too many ${r}` };
+    }
+    return { ok:true, cost };
+  }
+};
+const G = { state:null, view:null, isHost:false, mySeat:"P1", peer:null, conn:null, roomCode:null };
+let lastRecordedMatch = null;
+let rulingUndo = null;
+let rulingUndoSeq = null;
+let TOWER_UID = 1;
+let lastRenderedPhase = null;
+let lastTurnKey = null;
+const mkTower = name => ({ id: TOWER_UID++, name });
+const towerNames = p => p.towers.map(t => t.name);
+const idxOf = (p, id) => p.towers.findIndex(t => t.id === Number(id));
+const draftedCount = p => p.towers.filter(t => !isFarm(t)).length;
+function addTower(p, name) { const t = mkTower(name); p.towers.push(t); return t; }
+function removeTowerAt(p, idx) {
+  const t = p.towers[idx];
+  if (!t) return null;
+  p.towers.splice(idx, 1);
+  const id = t.id;
+  p.hidden = p.hidden.filter(x => x !== id);
+  p.probed = p.probed.filter(x => x !== id);
+  p.downgradedS = p.downgradedS.filter(x => x !== id);
+  delete p.protectedUntil[id];
+  if (p.markedId === id) p.markedId = null;
+  return t;
+}
+function emptyPlayer(name) {
+  return {
+    name: name || "Player", rulings: [], spent: [], towers: [],
+    hidden: [], probed: [], downgradedS: [], protectedUntil: {},
+    ready:false, locked:false, result:null,
+    removedCount:0, banChoice:null, martyred:false, pendingReplacement:0,
+    riposteActive:false, wardActive:false, lockedRulingsUntil:0,
+    markedId:null, timerHalved:false, bonusPicks:0, passBank:0,
+    frozenUntil:0, frozenType:null, jinxed:false, inspected:false,
+    consecutiveTimeouts:0
+  };
+}
+function newState({ draftType="Open", mode="offline", p1name="Blue", p2name="Red", unranked=false }={}) {
+  return {
+    v:1, matchId:randHex(3).toUpperCase(), phase:"coin", mode, draftType, unranked,
+    actionSeq:0,
+    players:{ P1:emptyPlayer(p1name), P2:emptyPlayer(p2name) },
+    turn:"P1", firstPicker:null,
+    picksThisTurn:0, picksPerTurn: draftType === "Close" ? 2 : 1,
+    round:1,
+    coin:{ commits:{}, reveals:{}, winner:null },
+    removed:{ P1:[], P2:[] }, poolBanned:[], pool:[...TOWERS],
+    log:[], chat:[], startedAt:now(), lastActionAt:now(),
+    lastRuling:null, lastPick:null, clarityActive:false, forcedPick:null,
+    privateReveals:{ P1:[], P2:[] }, rulingsRevealed:{ P1:false, P2:false },
+    reportDeadline:null,
+    banPhase:{ P1:null, P2:null }
+  };
+}
+function log(state, msg) { state.log.push({ t:now(), msg:String(msg).slice(0,300) }); }
+function redactFor(state, seat) {
+  const s = JSON.parse(JSON.stringify(state));
+  const oppSeat = seat === "P1" ? "P2" : "P1";
+  const o = s.players[oppSeat];
+  const rulingsVisible = (state.phase === "reveal") || state.rulingsRevealed?.[seat];
+  if (!rulingsVisible) o.rulings = [];
+  if (state.clarityActive || (state.players[oppSeat] && state.players[oppSeat].inspected)) {
+    o.hidden = [];
+  } else {
+    const hid = o.hidden.slice();
+    const peeked = state.privateReveals?.[seat] || [];
+    o.towers = o.towers.map(t => peeked.includes(t.id) ? t : (hid.includes(t.id) ? { id:t.id, name:null } : t));
+    o.hidden = [];
+  }
+  s.privateReveals = { [seat]: state.privateReveals?.[seat] || [] };
+  return s;
+}
+function countS(p) { return p.towers.filter(t => towerTier(t.name) === "S" && !p.downgradedS.includes(t.id)).length; }
+function canAfford(p, r) { return p.rulings.reduce((s,x) => s + RULINGS[x].cost, 0) + RULINGS[r].cost <= CAPS.points; }
+function hasSlot(p) { return p.rulings.length < CAPS.slots; }
+function countRuling(p, r) { return p.rulings.filter(x => x === r).length; }
+function isProtected(p, id) { const v = p.protectedUntil[id]; if (v === undefined) return false; if (v === -1) return true; return v >= 0; }
+function applyAction(state, action, actor) {
+  const ok = s => { s.actionSeq = (s.actionSeq||0) + 1; return { ok:true, state:s }; };
+  const err = msg => ({ ok:false, error:msg });
+  const opp = actor === "P1" ? "P2" : "P1";
+  switch (action.type) {
+    case "COIN_COMMIT": {
+      if (state.phase !== "coin") return err("Wrong phase");
+      if (state.coin.commits[actor]) return err("Already committed");
+      state.coin.commits[actor] = String(action.hash||"").slice(0,128);
+      log(state, `${state.players[actor].name} committed`);
+      state.lastActionAt = now();
+      return ok(state);
+    }
+    case "COIN_REVEAL": {
+      if (state.phase !== "coin") return err("Wrong phase");
+      if (!state.coin.commits[actor]) return err("Must commit first");
+      if (state.coin.reveals[actor]) return err("Already revealed");
+      const secret = String(action.secret || "").slice(0, 128);
+      const expected = String(state.coin.commits[actor] || "");
+      if (syncHash(secret) !== expected) return err("Commit-reveal mismatch — coin rigging detected");
+      state.coin.reveals[actor] = secret;
+      log(state, `${state.players[actor].name} revealed`);
+      if (state.coin.reveals.P1 && state.coin.reveals.P2) {
+        const combined = state.coin.reveals.P1 + state.coin.reveals.P2;
+        let h = 0; for (let i = 0; i < combined.length; i++) h = (h * 31 + combined.charCodeAt(i)) >>> 0;
+        state.coin.winner = (h % 2 === 0) ? "P1" : "P2";
+        log(state, `Winner: ${state.players[state.coin.winner].name}`);
+      }
+      state.lastActionAt = now();
+      return ok(state);
+    }
+    case "COIN_CHOOSE": {
+      if (state.phase !== "coin") return err("Wrong phase");
+      if (state.coin.winner !== actor) return err("Not the winner");
+      if (action.choice === "first") { state.firstPicker = actor; state.turn = actor; }
+      else { state.firstPicker = opp; state.turn = opp; }
+      state.phase = "config";
+      log(state, `${state.players[actor].name} chose ${action.choice} pick`);
+      state.lastActionAt = now();
+      return ok(state);
+    }
+    case "CONFIRM_CONFIG": {
+      if (state.phase !== "config") return err("Wrong phase");
+      state.players[actor].ready = true;
+      log(state, `${state.players[actor].name} confirmed`);
+      if (state.players.P1.ready && state.players.P2.ready) { state.phase = "ban"; state.turn = "P1"; }
+      state.lastActionAt = now();
+      return ok(state);
+    }
+    case "BAN_TOWER": {
+      if (state.phase !== "ban") return err("Wrong phase");
+      const p = state.players[actor];
+      if (p.banChoice) return err("You already banned a tower");
+      const t = action.tower;
+      if (!TOWERS.includes(t)) return err("Unknown tower");
+      if (isFarm(t)) return err("Farm cannot be banned");
+      if (state.poolBanned.includes(t)) return err("Already banned");
+      p.banChoice = t;
+      state.banPhase[actor] = t;
+      state.poolBanned.push(t);
+      state.pool = state.pool.filter(x => x !== t);
+      log(state, `${p.name} banned ${t}`);
+      state.lastActionAt = now();
+      if (state.players.P1.banChoice && state.players.P2.banChoice) {
+        state.phase = "rulings";
+        state.turn = "P1";
+      }
+      return ok(state);
+    }
+    case "ADD_RULING": {
+      if (state.phase !== "rulings") return err("Wrong phase");
+      const p = state.players[actor];
+      if (p.locked) return err("Portfolio is locked");
+      let r = action.ruling;
+      r = RENAME_MAP[r] || r;
+      if (!RULINGS[r]) return err("Unknown ruling");
+      if (!hasSlot(p)) return err("No slots left (3/3 used)");
+      if (!canAfford(p, r)) return err("Not enough points (" + RULINGS[r].cost + " needed, " + (CAPS.points - p.rulings.reduce((s,x)=>s+RULINGS[x].cost,0)) + " left)");
+      const capChecks = [
+        ["Veto",CAPS.veto],["Delete",CAPS.delete],["Martyr",CAPS.martyr],["Silence",CAPS.silence],
+        ["Doom",CAPS.doom],["Pact",CAPS.pact],["Fuse",CAPS.fuse],["Split",CAPS.split],
+        ["Ascend",CAPS.ascend],["Ruin",CAPS.ruin],["Amnesty",CAPS.amnesty],["Purge",CAPS.purge],
+        ["Jinx",CAPS.jinx],["Echo",CAPS.echo],["Haven",CAPS.haven]
+      ];
+      for (const [name, cap] of capChecks) {
+        if (r === name && countRuling(p, name) >= cap) return err(`Max ${cap} ${name} allowed`);
+      }
+      p.rulings.push(r);
+      state.lastActionAt = now();
+      return ok(state);
+    }
+    case "UNDO_RULING": {
+      if (state.phase !== "rulings" || state.players[actor].locked) return err("Cannot undo");
+      state.players[actor].rulings.pop();
+      state.lastActionAt = now();
+      return ok(state);
+    }
+    case "RESET_RULING": {
+      if (state.phase !== "rulings" || state.players[actor].locked) return err("Cannot reset");
+      state.players[actor].rulings = [];
+      state.lastActionAt = now();
+      return ok(state);
+    }
+    case "LOCK_RULING": {
+      if (state.phase !== "rulings") return err("Wrong phase");
+      const p = state.players[actor];
+      if (p.locked) return err("Already locked");
+      let cost = 0; for (const r of p.rulings) cost += RULINGS[r].cost;
+      if (cost > CAPS.points) return err("Cost over budget");
+      p.locked = true;
+      log(state, `${p.name} locked their portfolio`);
+      if (state.players.P1.locked && state.players.P2.locked) state.phase = "reveal";
+      state.lastActionAt = now();
+      return ok(state);
+    }
+    case "BEGIN_DRAFT": {
+      if (state.phase !== "reveal") return err("Wrong phase");
+      if (!state.players.P1.towers.some(t => t.name === FARM)) addTower(state.players.P1, FARM);
+      if (!state.players.P2.towers.some(t => t.name === FARM)) addTower(state.players.P2, FARM);
+      state.rulingsRevealed.P1 = true;
+      state.rulingsRevealed.P2 = true;
+      state.phase = "draft";
+      state.turn = state.firstPicker;
+      state.picksThisTurn = 0;
+      state.round = 1;
+      state.forcedPick = null;
+      rulingUndo = null;
+      rulingUndoSeq = null;
+      log(state, `Draft begins — ${state.players[state.firstPicker].name} picks first`);
+      state.lastActionAt = now();
+      return ok(state);
+    }
+    case "PICK": {
+      if (state.phase !== "draft") return err("Wrong phase");
+      if (state.turn !== actor) return err("Not your turn");
+      const t = action.tower;
+      const p = state.players[actor];
+      if (!TOWERS.includes(t)) return err("Unknown tower");
+      if (state.poolBanned.includes(t)) return err("That tower is banned");
+      if (!state.pool.includes(t)) return err("That tower is already taken");
+      if (p.towers.some(x => x.name === t)) return err("You already own that tower");
+      if (draftedCount(p) >= CAPS.towers) return err("Your draft is complete");
+      if (state.forcedPick && state.forcedPick.forSeat === actor) {
+        if (!state.pool.includes(state.forcedPick.tower)) state.forcedPick = null;
+        else if (state.forcedPick.tower !== t) return err(`You are forced to pick ${state.forcedPick.tower}`);
+      }
+      if (towerTier(t) === "S" && countS(p) >= 1) return err("S-tier cap: you already hold an S-tier");
+      state.pool = state.pool.filter(x => x !== t);
+      addTower(p, t);
+      if (p.pendingReplacement > 0) p.pendingReplacement--;
+      state.picksThisTurn++;
+      p.consecutiveTimeouts = 0;
+      state.lastPick = { by: actor, name: t };
+      if (state.forcedPick && state.forcedPick.forSeat === actor) state.forcedPick = null;
+      log(state, `${p.name} drafted ${t}`);
+      advanceTurn(state);
+      state.lastActionAt = now();
+      return ok(state);
+    }
+    case "USE_RULING": {
+      if (state.phase !== "draft") return err("Wrong phase");
+      if (state.turn !== actor) return err("Not your turn");
+      const r = RENAME_MAP[action.ruling] || action.ruling;
+      const p0 = state.players[actor];
+      if (!p0.rulings.includes(r)) return err("You don't own that ruling");
+      if (p0.lockedRulingsUntil >= state.round) {
+        if (p0.jinxed && p0.rulings.length) {
+          p0.jinxed = false;
+          const di = randInt(p0.rulings.length);
+          const disc = p0.rulings.splice(di, 1)[0];
+          p0.spent.push(disc);
+          log(state, `Jinx triggered: ${p0.name} lost ${disc} (blocked)`);
+        }
+        return err("Your rulings are locked down");
+      }
+      if (p0.frozenUntil >= state.round && p0.frozenType === r) {
+        if (p0.jinxed && p0.rulings.length) {
+          p0.jinxed = false;
+          const di = randInt(p0.rulings.length);
+          const disc = p0.rulings.splice(di, 1)[0];
+          p0.spent.push(disc);
+          log(state, `Jinx triggered: ${p0.name} lost ${disc} (frozen)`);
+        }
+        return err(`${r} is frozen`);
+      }
+      p0.consecutiveTimeouts = 0;
+      const snapshot = (r === "Veto") ? null : JSON.stringify(state);
+      const eff = applyRulingEffect(state, actor, r, action);
+      if (!eff.ok) return err(eff.error);
+      const pl = state.players[actor];
+      if (r !== "Ward" && pl.wardActive) {
+        state.lastRulingWarded = true;
+        pl.wardActive = false;
+      } else if (r !== "Ward") {
+        state.lastRulingWarded = false;
+      }
+      if (!eff.keepRuling) {
+        const idx = pl.rulings.indexOf(r);
+        if (idx >= 0) pl.rulings.splice(idx, 1);
+        pl.spent.push(r);
+      }
+      if (r === "Veto") {
+        rulingUndo = null;
+        rulingUndoSeq = null;
+        state.lastRuling = { by:actor, ruling:"Veto", warded:false };
+      } else {
+        rulingUndo = snapshot;
+        rulingUndoSeq = (state.actionSeq||0) + 1;
+        state.lastRuling = { by:actor, ruling:r, target:action.target, meta:eff.meta||null, warded:!!state.lastRulingWarded };
+      }
+      if (r !== "Jinx" && pl.jinxed && pl.rulings.length) {
+        pl.jinxed = false;
+        const di = randInt(pl.rulings.length);
+        const disc = pl.rulings.splice(di, 1)[0];
+        pl.spent.push(disc);
+        log(state, `Jinx triggered: ${pl.name} also lost ${disc}`);
+      }
+      if (!eff.silent) log(state, `${pl.name} used ${r}`);
+      if (state.phase === "draft" && draftedCount(state.players[actor]) >= CAPS.towers) {
+        advanceTurn(state);
+      }
+      state.lastActionAt = now();
+      return ok(state);
+    }
+    case "ADD_CHAT": {
+      if (state.mode !== "online") return err("Chat is online-only");
+      const txt = String(action.msg || "").slice(0, 200).trim();
+      if (!txt) return err("Empty message");
+      const last = state.chat[state.chat.length-1];
+      if (last && last.sender === actor && (now() - last.t) < 800) return err("Too fast");
+      state.chat.push({ t: now(), sender: actor, name: state.players[actor].name, msg: txt });
+      if (state.chat.length > 100) state.chat = state.chat.slice(-100);
+      state.lastActionAt = now();
+      return ok(state);
+    }
+    case "REPORT_READY": {
+      if (state.phase !== "handoff") return err("Wrong phase");
+      state.players[actor].ready = true;
+      if (state.players.P1.ready && state.players.P2.ready) {
+        state.phase = "result";
+        state.reportDeadline = now() + 5*60*1000;
+      }
+      state.lastActionAt = now();
+      return ok(state);
+    }
+    case "REPORT_RESULT": {
+      if (state.phase !== "result") return err("Wrong phase");
+      state.players[actor].result = action.result;
+      log(state, `${state.players[actor].name} reported ${action.result}`);
+      if (state.players.P1.result && state.players.P2.result) finalizeResults(state);
+      state.lastActionAt = now();
+      return ok(state);
+    }
+    case "AUTO_RESOLVE_REPORT": {
+      if (state.phase !== "result") return err("Wrong phase");
+      const p1r = state.players.P1.result, p2r = state.players.P2.result;
+      if (p1r && !p2r) { state.players.P2.result = p1r === "win" ? "loss" : (p1r === "loss" ? "win" : "tech"); log(state, `Auto-resolved: ${state.players.P2.name} did not report`); }
+      else if (p2r && !p1r) { state.players.P1.result = p2r === "win" ? "loss" : (p2r === "loss" ? "win" : "tech"); log(state, `Auto-resolved: ${state.players.P1.name} did not report`); }
+      else if (p1r && p2r) { finalizeResults(state); return ok(state); }
+      else { state.outcome = { type:"void", reason:"Both failed to report" }; state.phase = "final"; return ok(state); }
+      finalizeResults(state);
+      return ok(state);
+    }
+    case "AUTO_PASS_TURN": {
+      if (state.phase !== "draft") return err("Wrong phase");
+      if (state.turn !== actor) return err("Not your turn");
+      const pl = state.players[actor];
+      pl.consecutiveTimeouts = (pl.consecutiveTimeouts || 0) + 1;
+      if (pl.consecutiveTimeouts >= 3) {
+        const legal = state.pool.filter(t => !isFarm(t) && !state.poolBanned.includes(t)
+          && !pl.towers.some(x => x.name === t)
+          && !(towerTier(t) === "S" && countS(pl) >= 1));
+        if (legal.length && draftedCount(pl) < CAPS.towers) {
+          const pick = legal[randInt(legal.length)];
+          state.pool = state.pool.filter(x => x !== pick);
+          addTower(pl, pick);
+          log(state, `${pl.name} timed out 3× — auto-picked ${pick}`);
+          pl.consecutiveTimeouts = 0;
+          advanceTurn(state);
+          state.lastActionAt = now();
+          return ok(state);
+        }
+      }
+      log(state, `${pl.name} ran out of time — turn auto-passed`);
+      advanceTurn(state, true);
+      state.lastActionAt = now();
+      return ok(state);
+    }
+    case "AUTO_BAN": {
+      if (state.phase !== "ban") return err("Wrong phase");
+      const p = state.players[actor];
+      if (p.banChoice) return ok(state);
+      const candidates = state.pool.filter(x => !isFarm(x) && (towerTier(x) === "C" || towerTier(x) === "B"));
+      const pick = candidates[randInt(candidates.length)] || state.pool[0];
+      return applyAction(state, { type:"BAN_TOWER", tower: pick }, actor);
+    }
+    case "CONCEDE": {
+      if (state.phase !== "draft" && state.phase !== "handoff") return err("Cannot concede in this phase");
+      if (state.players[actor].result) return err("Already reported");
+      const oppSeat = actor === "P1" ? "P2" : "P1";
+      state.players[actor].result = "loss";
+      state.players[oppSeat].result = "win";
+      log(state, `${state.players[actor].name} conceded`);
+      finalizeResults(state);
+      state.lastActionAt = now();
+      return ok(state);
+    }
+    case "ABORT": {
+      state.phase = "final";
+      state.aborted = true;
+      state.outcome = { type:"void", reason:"Aborted by " + state.players[actor].name };
+      rulingUndo = null;
+      rulingUndoSeq = null;
+      log(state, `Match aborted`);
+      state.lastActionAt = now();
+      return ok(state);
+    }
+    default: return err("Unknown action");
+  }
+}
+function advanceTurn(state, force = false) {
+  const cur = state.turn, other = cur === "P1" ? "P2" : "P1";
+  const cp = state.players[cur], op = state.players[other];
+  const allowed = state.picksPerTurn + (cp.bonusPicks || 0);
+  const curDone = draftedCount(cp) >= CAPS.towers;
+  const otherDone = draftedCount(op) >= CAPS.towers;
+  if (!force && !curDone && state.picksThisTurn < allowed) return;
+  if (state.forcedPick && state.forcedPick.forSeat === cur) state.forcedPick = null;
+  if (curDone && otherDone) {
+    state.phase = "handoff";
+    cp.bonusPicks = 0; cp.passBank = 0; cp.timerHalved = false;
+    state.players.P1.hidden = [];
+    state.players.P2.hidden = [];
+    state.players.P1.probed = [];
+    state.players.P2.probed = [];
+    log(state, `Draft complete — all towers revealed`);
+    return;
+  }
+  if (otherDone) {
+    cp.bonusPicks = (cp.bonusPicks || 0) + (cp.passBank || 0);
+    cp.passBank = 0;
+    cp.timerHalved = false;
+    state.picksThisTurn = 0;
+    return;
+  }
+  cp.bonusPicks = cp.passBank || 0;
+  cp.passBank = 0;
+  cp.timerHalved = false;
+  // Snake order: rounds 2 and 4 reverse the pick order in Open draft.
+  // Only while the current player still has picks left — a player who just
+  // finished their 4th tower always hands off, snake or not, or the draft
+  // would freeze with the turn stuck on someone who can no longer pick.
+  const snakeReverse = !curDone && (state.draftType === "Open") && (state.round % 2 === 0);
+  state.turn = snakeReverse ? cur : other;
+  state.picksThisTurn = 0;
+  state.round++;
+  state.players.P1.markedId = null;
+  state.players.P2.markedId = null;
+  state.players.P1.riposteActive = false;
+  state.players.P2.riposteActive = false;
+  [state.players.P1, state.players.P2].forEach(pl => {
+    Object.keys(pl.protectedUntil).forEach(id => {
+      const val = pl.protectedUntil[id];
+      if (val !== -1 && state.round > val) delete pl.protectedUntil[id];
+    });
+  });
+}
+function applyRulingEffect(state, actor, r, action) {
+  const p = state.players[actor];
+  const opp = actor === "P1" ? "P2" : "P1";
+  const oppP = state.players[opp];
+  const target = action.target;
+  switch (r) {
+    case "Pass": {
+      if (draftedCount(p) >= CAPS.towers) return { ok:false, error:"Draft already complete" };
+      if (state.forcedPick && state.forcedPick.forSeat === actor) return { ok:false, error:"You are forced to pick — Pass is not allowed" };
+      const allowed = state.picksPerTurn + (p.bonusPicks || 0);
+      const remaining = Math.max(0, allowed - state.picksThisTurn);
+      if (remaining <= 0) return { ok:false, error:"Nothing to skip" };
+      p.passBank = Math.min(2, (p.passBank || 0) + remaining);
+      log(state, `${p.name} passed — ${remaining} pick(s) banked (max 2)`);
+      advanceTurn(state, true);
+      return { ok:true };
+    }
+    case "Change": {
+      const idx = idxOf(p, target);
+      if (idx < 0) return { ok:false, error:"Bad target" };
+      if (isFarm(p.towers[idx])) return { ok:false, error:"Cannot change Farm" };
+      const removed = removeTowerAt(p, idx);
+      state.removed[actor].push(removed.name);
+      state.pool = [...new Set([...state.pool, removed.name])];
+      p.pendingReplacement++;
+      log(state, `Change: ${removed.name} returned to pool`);
+      return { ok:true };
+    }
+    case "Bounty": {
+      if (target === "refund") {
+        if (!p.spent.length) return { ok:false, error:"No spent rulings to refund" };
+        if (p.rulings.length >= CAPS.slots) return { ok:false, error:"No free slot" };
+        const back = p.spent.pop();
+        p.rulings.push(back);
+        log(state, `Bounty refunded ${back}`);
+        return { ok:true };
+      }
+      const idx = idxOf(oppP, target);
+      if (idx < 0) return { ok:false, error:"Bad target" };
+      const id = oppP.towers[idx].id;
+      if (!oppP.hidden.includes(id)) return { ok:false, error:"Not hidden" };
+      oppP.hidden = oppP.hidden.filter(i => i !== id);
+      log(state, `Bounty revealed ${oppP.towers[idx].name}`);
+      return { ok:true };
+    }
+    case "Peek": {
+      if (oppP.inspected) return { ok:false, error:"Opponent's towers already fully revealed" };
+      const idx = idxOf(oppP, target);
+      if (idx < 0) return { ok:false, error:"Bad target" };
+      const id = oppP.towers[idx].id;
+      if (!oppP.hidden.includes(id)) return { ok:false, error:"Not hidden" };
+      if (!state.privateReveals) state.privateReveals = { P1:[], P2:[] };
+      if (!state.privateReveals[actor].includes(id)) state.privateReveals[actor].push(id);
+      log(state, `Peek: ${p.name} quietly peeked at a hidden tower`);
+      return { ok:true };
+    }
+    case "Probe": {
+      const idx = idxOf(oppP, target);
+      if (idx < 0) return { ok:false, error:"Bad target" };
+      const id = oppP.towers[idx].id;
+      if (!oppP.hidden.includes(id)) return { ok:false, error:"Not hidden" };
+      oppP.hidden = oppP.hidden.filter(i => i !== id);
+      if (!oppP.probed.includes(id)) oppP.probed.push(id);
+      log(state, `Probe revealed ${oppP.towers[idx].name} permanently`);
+      return { ok:true };
+    }
+    case "Hide": {
+      if (p.inspected) return { ok:false, error:"You cannot hide — you have been Inspected." };
+      const idx = idxOf(p, target);
+      if (idx < 0) return { ok:false, error:"Bad target" };
+      if (isFarm(p.towers[idx])) return { ok:false, error:"Cannot hide Farm" };
+      const id = p.towers[idx].id;
+      if (p.hidden.length >= CAPS.hidden) return { ok:false, error:"Hidden cap reached (max 2)" };
+      if (p.probed.includes(id)) return { ok:false, error:"That tower was probed — cannot hide" };
+      if (state.clarityActive) return { ok:false, error:"Clarity is active — nothing can be hidden" };
+      if (!p.hidden.includes(id)) p.hidden.push(id);
+      log(state, `Hide: a tower was concealed`);
+      return { ok:true };
+    }
+    case "Turn": {
+      if (state.draftType === "Close") return { ok:false, error:"Not allowed in Close draft" };
+      if (draftedCount(p) >= CAPS.towers) return { ok:false, error:"Draft already complete" };
+      p.bonusPicks = (p.bonusPicks || 0) + 1;
+      log(state, `${p.name} takes an extra pick`);
+      return { ok:true };
+    }
+    case "Delay": {
+      oppP.timerHalved = true;
+      log(state, `Delay: ${oppP.name}'s next timer halved`);
+      return { ok:true };
+    }
+    case "Mark": {
+      const idx = idxOf(oppP, target);
+      if (idx < 0) return { ok:false, error:"Bad target" };
+      if (isFarm(oppP.towers[idx])) return { ok:false, error:"Farm is untargetable" };
+      const id = oppP.towers[idx].id;
+      oppP.hidden = oppP.hidden.filter(i => i !== id);
+      delete oppP.protectedUntil[id];
+      oppP.markedId = id;
+      log(state, `Mark: ${oppP.towers[idx].name} exposed`);
+      return { ok:true };
+    }
+    case "Fracture": {
+      const idx = idxOf(p, target);
+      if (idx < 0) return { ok:false, error:"Bad target" };
+      if (towerTier(p.towers[idx].name) !== "S") return { ok:false, error:"Not S-tier" };
+      const id = p.towers[idx].id;
+      if (!p.downgradedS.includes(id)) p.downgradedS.push(id);
+      log(state, `Fracture: ${p.towers[idx].name} treated as A-tier`);
+      return { ok:true };
+    }
+    case "Revive": {
+      if (!state.poolBanned.includes(target)) return { ok:false, error:"Not banned" };
+      state.poolBanned = state.poolBanned.filter(x => x !== target);
+      state.pool = [...new Set([...state.pool, target])];
+      log(state, `Revive: ${target} returned to pool`);
+      return { ok:true };
+    }
+    case "Shift": {
+      const idx = idxOf(p, target);
+      if (idx < 0) return { ok:false, error:"Bad target" };
+      const src = p.towers[idx];
+      if (isFarm(src)) return { ok:false, error:"Cannot shift Farm" };
+      const srcTier = towerTier(src.name);
+      if (srcTier === "S") return { ok:false, error:"S-tier cannot be shifted" };
+      if (!state.pool.includes(action.want)) return { ok:false, error:"Target not in pool" };
+      if (towerTier(action.want) !== srcTier) return { ok:false, error:"Must be same tier" };
+      removeTowerAt(p, idx);
+      state.removed[actor].push(src.name);
+      addTower(p, action.want);
+      state.pool = state.pool.filter(x => x !== action.want);
+      state.pool = [...new Set([...state.pool, src.name])];
+      log(state, `Shift: ${src.name} → ${action.want}`);
+      return { ok:true };
+    }
+    case "Cloak": {
+      if (p.inspected) return { ok:false, error:"You cannot cloak — you have been Inspected." };
+      const idx = idxOf(p, target);
+      if (idx < 0) return { ok:false, error:"Bad target" };
+      if (isFarm(p.towers[idx])) return { ok:false, error:"Cannot cloak Farm" };
+      const id = p.towers[idx].id;
+      if (p.hidden.length >= CAPS.hidden) return { ok:false, error:"Hidden cap reached" };
+      if (state.clarityActive) return { ok:false, error:"Clarity is active" };
+      if (p.probed.includes(id)) return { ok:false, error:"Probed" };
+      if (!p.hidden.includes(id)) p.hidden.push(id);
+      return { ok:true, silent:true };
+    }
+    case "Rebel": {
+      const lr = state.lastRuling;
+      if (!lr || lr.ruling !== "Steal" || lr.by === actor || !lr.meta || !lr.meta.name) return { ok:false, error:"No Steal to reverse" };
+      const thief = state.players[lr.by];
+      const i = thief.towers.findIndex(t => t.name === lr.meta.name);
+      if (i < 0) return { ok:false, error:"Stolen tower not found" };
+      const t = removeTowerAt(thief, i);
+      addTower(p, t.name);
+      thief.removedCount = Math.max(0, thief.removedCount - 1);
+      thief.pendingReplacement = Math.max(0, thief.pendingReplacement - 1);
+      state.lastRuling = null;
+      log(state, `Rebel: ${t.name} returned to ${p.name}`);
+      return { ok:true };
+    }
+    case "Recall": {
+      if (!state.removed[actor].length) return { ok:false, error:"Nothing to recall" };
+      const name = state.removed[actor].pop();
+      if (p.towers.some(t => t.name === name)) { state.removed[actor].push(name); return { ok:false, error:"You already own that" }; }
+      if (towerTier(name) === "S" && countS(p) >= 1) { state.removed[actor].push(name); return { ok:false, error:"S-tier cap" }; }
+      addTower(p, name);
+      state.pool = state.pool.filter(x => x !== name);
+      log(state, `Recall: ${name}`);
+      return { ok:true };
+    }
+    case "Mirror": {
+      if (!state.lastPick) return { ok:false, error:"No last pick" };
+      if (state.lastPick.by === actor) return { ok:false, error:"Last pick was yours" };
+      const name = state.lastPick.name;
+      if (!state.pool.includes(name)) return { ok:false, error:"No longer in pool" };
+      if (p.towers.some(t => t.name === name)) return { ok:false, error:"Already own" };
+      if (towerTier(name) === "S" && countS(p) >= 1) return { ok:false, error:"S-tier cap" };
+      state.pool = state.pool.filter(x => x !== name);
+      addTower(p, name);
+      log(state, `Mirror: ${p.name} copies ${name}`);
+      return { ok:true };
+    }
+    case "Ward": {
+      p.wardActive = true;
+      log(state, `Ward: ${p.name}'s next ruling cannot be Veto'd or Silenced`);
+      return { ok:true };
+    }
+    case "Anchor": {
+      const idx = idxOf(p, target);
+      if (idx < 0) return { ok:false, error:"Bad target" };
+      if (isFarm(p.towers[idx])) return { ok:false, error:"Farm is already untargetable" };
+      if (Object.keys(p.protectedUntil).length >= CAPS.protected) return { ok:false, error:"Protection cap" };
+      p.protectedUntil[p.towers[idx].id] = -1;
+      log(state, `Anchor: ${p.towers[idx].name} permanently protected`);
+      return { ok:true };
+    }
+    case "Split": {
+      const idx = idxOf(p, target);
+      if (idx < 0) return { ok:false, error:"Bad target" };
+      const src = p.towers[idx];
+      if (towerTier(src.name) !== "S") return { ok:false, error:"Not S-tier" };
+      const n1 = action.pick1, n2 = action.pick2;
+      if (!n1 || !n2 || n1 === n2) return { ok:false, error:"Pick two different towers" };
+      if (towerTier(n1) === "S" || towerTier(n2) === "S") return { ok:false, error:"Targets must be A/B/C" };
+      if (!state.pool.includes(n1) || !state.pool.includes(n2)) return { ok:false, error:"Target not in pool" };
+      removeTowerAt(p, idx);
+      state.removed[actor].push(src.name);
+      addTower(p, n1); addTower(p, n2);
+      state.pool = state.pool.filter(x => x !== n1 && x !== n2);
+      state.pool.push(src.name);
+      log(state, `Split: ${src.name} → ${n1} + ${n2}`);
+      return { ok:true };
+    }
+    case "Duplicate": {
+      const idx = idxOf(p, target);
+      if (idx < 0) return { ok:false, error:"Bad target" };
+      const src = p.towers[idx];
+      if (isFarm(src)) return { ok:false, error:"Cannot duplicate Farm" };
+      if (towerTier(src.name) === "S") return { ok:false, error:"S-tier cannot be duplicated" };
+      if (!state.pool.includes(src.name)) return { ok:false, error:"Original not in pool" };
+      state.pool = state.pool.filter(x => x !== src.name);
+      addTower(p, src.name);
+      log(state, `Duplicate: ${p.name} copied ${src.name}`);
+      return { ok:true };
+    }
+    case "Echo": {
+      const lastSelf = (state.lastRuling && state.lastRuling.by === actor) ? state.lastRuling.ruling : null;
+      if (!lastSelf) return { ok:false, error:"You have not used a ruling yet" };
+      if (["Echo","Graft","Veto"].includes(lastSelf)) return { ok:false, error:"Cannot Echo that" };
+      const sub = applyRulingEffect(state, actor, lastSelf, action);
+      if (!sub.ok) return { ok:false, error:`Echo failed: ${sub.error}` };
+      log(state, `Echo re-applied ${lastSelf}`);
+      return { ok:true, meta: sub.meta || null };
+    }
+    case "Freeze": {
+      if (state.draftType !== "Close") return { ok:false, error:"Closing draft only" };
+      const type = RENAME_MAP[target] || String(target).slice(0,32);
+      if (!RULINGS[type]) return { ok:false, error:"Unknown ruling type" };
+      oppP.frozenUntil = state.round;
+      oppP.frozenType = type;
+      log(state, `Freeze: ${oppP.name} cannot use ${type} this round`);
+      return { ok:true };
+    }
+    case "Secure": {
+      const idx = idxOf(p, target);
+      if (idx < 0) return { ok:false, error:"Bad target" };
+      const tid = p.towers[idx].id;
+      if (!isProtected(p, tid) && Object.keys(p.protectedUntil).length >= CAPS.protected) return { ok:false, error:"Protection cap" };
+      p.protectedUntil[tid] = state.round + 3;
+      log(state, `Secure: ${p.towers[idx].name} protected 2 rounds`);
+      return { ok:true };
+    }
+    case "Riposte": {
+      p.riposteActive = true;
+      log(state, `Riposte: ${p.name} will negate the next removal`);
+      return { ok:true };
+    }
+    case "Inspect": {
+      oppP.hidden = [];
+      oppP.inspected = true;
+      log(state, `Inspect: all of ${oppP.name}'s hidden towers revealed`);
+      return { ok:true };
+    }
+    case "Graft": {
+      const lr = state.lastRuling;
+      if (!lr) return { ok:false, error:"No ruling to copy" };
+      const last = lr.ruling;
+      if (last === "Graft" || last === "Veto") return { ok:false, error:"Cannot Graft that" };
+      if (!RULINGS[last]) return { ok:false, error:"Cannot Graft that" };
+      if (RULINGS[last].cost > RULINGS.Graft.cost) return { ok:false, error:"Cost too high" };
+      const sub = applyRulingEffect(state, actor, last, action);
+      if (!sub.ok) return { ok:false, error:`Graft failed: ${sub.error}` };
+      log(state, `Graft re-applied ${last}`);
+      return { ok:true, meta: sub.meta || null };
+    }
+    case "Trade": {
+      const mi = idxOf(p, action.myId), oi = idxOf(oppP, action.oppId);
+      if (mi < 0 || oi < 0) return { ok:false, error:"Bad target" };
+      const a = p.towers[mi], b = oppP.towers[oi];
+      if (isFarm(a) || isFarm(b)) return { ok:false, error:"Farm untradeable" };
+      if (p.hidden.includes(a.id) || oppP.hidden.includes(b.id)) return { ok:false, error:"Hidden cannot be traded" };
+      if (isProtected(p, a.id) || isProtected(oppP, b.id)) return { ok:false, error:"Protected cannot be traded" };
+      const aCountsS = towerTier(a.name) === "S" && !p.downgradedS.includes(a.id);
+      const bCountsS = towerTier(b.name) === "S" && !oppP.downgradedS.includes(b.id);
+      if (countS(p) - (aCountsS?1:0) + (bCountsS?1:0) > 1) return { ok:false, error:"You would exceed the S-tier cap" };
+      if (countS(oppP) - (bCountsS?1:0) + (aCountsS?1:0) > 1) return { ok:false, error:"Opponent would exceed the S-tier cap" };
+      const aHidden = p.hidden.includes(a.id), bHidden = oppP.hidden.includes(b.id);
+      const aProt = p.protectedUntil[a.id], bProt = oppP.protectedUntil[b.id];
+      const aDowngraded = p.downgradedS.includes(a.id), bDowngraded = oppP.downgradedS.includes(b.id);
+      p.towers[mi] = b; oppP.towers[oi] = a;
+      delete p.protectedUntil[a.id]; delete oppP.protectedUntil[b.id];
+      if (bProt !== undefined) p.protectedUntil[b.id] = bProt;
+      if (aProt !== undefined) oppP.protectedUntil[a.id] = aProt;
+      p.hidden = p.hidden.filter(i => i !== a.id);
+      oppP.hidden = oppP.hidden.filter(i => i !== b.id);
+      if (bHidden) p.hidden.push(b.id);
+      if (aHidden) oppP.hidden.push(a.id);
+      p.downgradedS = p.downgradedS.filter(i => i !== a.id);
+      oppP.downgradedS = oppP.downgradedS.filter(i => i !== b.id);
+      if (bDowngraded) p.downgradedS.push(b.id);
+      if (aDowngraded) oppP.downgradedS.push(a.id);
+      log(state, `Trade: ${a.name} ↔ ${b.name}`);
+      return { ok:true };
+    }
+    case "Fuse": {
+      const i1 = idxOf(p, action.i1), i2 = idxOf(p, action.i2);
+      if (i1 < 0 || i2 < 0 || i1 === i2) return { ok:false, error:"Bad targets" };
+      const a = p.towers[i1], b = p.towers[i2];
+      if (isFarm(a) || isFarm(b)) return { ok:false, error:"Cannot fuse Farm" };
+      if (towerTier(a.name) === "S" || towerTier(b.name) === "S") return { ok:false, error:"Both non-S required" };
+      if (countS(p) >= 1) return { ok:false, error:"S-tier cap" };
+      const want = action.want;
+      if (!TOWERS.includes(want) || towerTier(want) !== "S") return { ok:false, error:"Must be S-tier" };
+      if (!state.pool.includes(want)) return { ok:false, error:"Not in pool" };
+      const hi = Math.max(i1, i2), lo = Math.min(i1, i2);
+      removeTowerAt(p, hi); removeTowerAt(p, lo);
+      state.removed[actor].push(a.name, b.name);
+      state.pool = state.pool.filter(x => x !== want);
+      addTower(p, want);
+      state.pool = [...new Set([...state.pool, a.name, b.name])];
+      log(state, `Fuse: ${a.name}+${b.name} → ${want}`);
+      return { ok:true };
+    }
+    case "Haven": {
+      p.towers.forEach(t => { if (!isFarm(t)) p.protectedUntil[t.id] = state.round + 1; });
+      log(state, `Haven: all of ${p.name}'s towers protected this round`);
+      return { ok:true };
+    }
+    case "Force": {
+      if (state.draftType === "Close") return { ok:false, error:"Opening only" };
+      if (!TOWERS.includes(target)) return { ok:false, error:"Unknown tower" };
+      if (isFarm(target)) return { ok:false, error:"Farm untargetable" };
+      if (!state.pool.includes(target)) return { ok:false, error:"Not in pool" };
+      if (draftedCount(oppP) >= CAPS.towers) return { ok:false, error:"Opponent's draft complete" };
+      if (oppP.towers.some(t => t.name === target)) return { ok:false, error:"Opponent already owns" };
+      if (towerTier(target) === "S" && countS(oppP) >= 1) return { ok:false, error:"Opponent holds S-tier" };
+      state.forcedPick = { by:actor, forSeat:opp, tower:target };
+      log(state, `Force: ${oppP.name} must pick ${target}`);
+      return { ok:true };
+    }
+    case "Evict": {
+      if (p.removedCount >= CAPS.removals) return { ok:false, error:"Removal cap (already used a removal this match)" };
+      const idx = idxOf(oppP, target);
+      if (idx < 0) return { ok:false, error:"Bad target" };
+      const v = oppP.towers[idx];
+      if (isFarm(v)) return { ok:false, error:"Farm untargetable" };
+      if (isProtected(oppP, v.id) && oppP.markedId !== v.id) return { ok:false, error:"Protected" };
+      if (oppP.riposteActive) { oppP.riposteActive = false; log(state, `Riposte negated Evict`); return { ok:true }; }
+      removeTowerAt(oppP, idx);
+      state.removed[opp].push(v.name);
+      p.removedCount++;
+      oppP.pendingReplacement++;
+      log(state, `Evict: ${v.name} removed`);
+      return { ok:true };
+    }
+    case "Strip": {
+      if (!oppP.rulings.length) return { ok:false, error:"Opponent has no rulings" };
+      const i = randInt(oppP.rulings.length);
+      const disc = oppP.rulings.splice(i, 1)[0];
+      oppP.spent.push(disc);
+      log(state, `Strip: ${oppP.name} lost ${disc}`);
+      return { ok:true };
+    }
+    case "Snatch": {
+      if (!hasSlot(p)) return { ok:false, error:"No free slot" };
+      const i = oppP.rulings.indexOf(target);
+      if (i < 0) return { ok:false, error:"Not found" };
+      const taken = oppP.rulings.splice(i, 1)[0];
+      p.rulings.push(taken);
+      log(state, `Snatch: ${p.name} took ${taken}`);
+      return { ok:true };
+    }
+    case "Salvage": {
+      if (!p.spent.length) return { ok:false, error:"No spent rulings" };
+      if (p.rulings.length >= CAPS.slots) return { ok:false, error:"No free slot" };
+      const back = p.spent.pop();
+      p.rulings.push(back);
+      log(state, `Salvage: recovered ${back}`);
+      return { ok:true };
+    }
+    case "Extort": {
+      if (!oppP.rulings.length) return { ok:false, error:"Opponent has no rulings" };
+      const i = oppP.rulings.indexOf(target);
+      if (i < 0) return { ok:false, error:"Not in opponent's hand" };
+      const disc = oppP.rulings.splice(i, 1)[0];
+      oppP.spent.push(disc);
+      log(state, `Extort: ${oppP.name} lost ${disc}`);
+      return { ok:true };
+    }
+    case "Jinx": {
+      oppP.jinxed = true;
+      log(state, `Jinx: ${oppP.name} is cursed`);
+      return { ok:true };
+    }
+    case "Dictate": {
+      if (!TOWERS.includes(target)) return { ok:false, error:"Unknown tower" };
+      if (isFarm(target)) return { ok:false, error:"Farm untargetable" };
+      if (!state.pool.includes(target)) return { ok:false, error:"Not in pool" };
+      if (draftedCount(oppP) >= CAPS.towers) return { ok:false, error:"Opponent's draft complete" };
+      if (oppP.towers.some(t => t.name === target)) return { ok:false, error:"Opponent already owns" };
+      if (towerTier(target) === "S" && countS(oppP) >= 1) return { ok:false, error:"Opponent holds S-tier" };
+      state.forcedPick = { by:actor, forSeat:opp, tower:target };
+      log(state, `Dictate: ${p.name} will pick ${target} for ${oppP.name}`);
+      return { ok:true };
+    }
+    case "Martyr": {
+      if (p.martyred) return { ok:false, error:"Already martyred" };
+      const idx = idxOf(p, target);
+      if (idx < 0) return { ok:false, error:"Bad target" };
+      if (isFarm(p.towers[idx])) return { ok:false, error:"Cannot martyr Farm" };
+      const name = p.towers[idx].name;
+      removeTowerAt(p, idx);
+      p.martyred = true;
+      p.towers.forEach(t => { p.protectedUntil[t.id] = -1; });
+      log(state, `Martyr: ${name} given up — remaining towers protected`);
+      return { ok:true };
+    }
+    case "Delete": {
+      if (p.removedCount >= CAPS.removals) return { ok:false, error:"Removal cap" };
+      if (!TOWERS.includes(target)) return { ok:false, error:"Unknown tower" };
+      if (isFarm(target)) return { ok:false, error:"Farm untargetable" };
+      if (state.poolBanned.includes(target)) return { ok:false, error:"Already deleted" };
+      state.poolBanned.push(target);
+      state.pool = state.pool.filter(x => x !== target);
+      p.removedCount++;
+      log(state, `Delete: ${target} removed permanently`);
+      return { ok:true };
+    }
+    case "Steal": {
+      if (p.removedCount >= CAPS.removals) return { ok:false, error:"Removal cap" };
+      const idx = idxOf(oppP, target);
+      if (idx < 0) return { ok:false, error:"Bad target" };
+      const v = oppP.towers[idx];
+      if (isFarm(v)) return { ok:false, error:"Farm untargetable" };
+      if (isProtected(oppP, v.id) && oppP.markedId !== v.id) return { ok:false, error:"Protected" };
+      if (towerTier(v.name) === "S" && !oppP.downgradedS.includes(v.id) && countS(p) >= 1) return { ok:false, error:"S-tier cap: you already hold an S-tier tower" };
+      if (oppP.riposteActive) { oppP.riposteActive = false; log(state, `Riposte negated Steal`); return { ok:true }; }
+      const taken = removeTowerAt(oppP, idx);
+      state.pool = state.pool.filter(x => x !== taken.name);
+      addTower(p, taken.name);
+      p.removedCount++;
+      oppP.pendingReplacement++;
+      log(state, `Steal: ${taken.name}`);
+      return { ok:true, meta:{ name: taken.name } };
+    }
+    case "Silence": {
+      if (oppP.wardActive) {
+        oppP.wardActive = false;
+        log(state, `Ward blocked Silence`);
+        return { ok:true };
+      }
+      oppP.lockedRulingsUntil = state.round + 1;
+      log(state, `Silence: ${oppP.name} cannot use rulings`);
+      return { ok:true };
+    }
+    case "Plunder": {
+      if (p.removedCount >= CAPS.removals) return { ok:false, error:"Removal cap" };
+      const idx = idxOf(oppP, action.stealId);
+      if (idx < 0) return { ok:false, error:"Bad steal" };
+      const v = oppP.towers[idx];
+      if (isFarm(v)) return { ok:false, error:"Farm untargetable" };
+      if (isProtected(oppP, v.id) && oppP.markedId !== v.id) return { ok:false, error:"Protected" };
+      if (towerTier(v.name) === "S" && !oppP.downgradedS.includes(v.id) && countS(p) >= 1) return { ok:false, error:"S-tier cap: you already hold an S-tier tower" };
+      if (oppP.riposteActive) { oppP.riposteActive = false; log(state, `Riposte negated Plunder`); return { ok:true }; }
+      const plantIdx = idxOf(p, action.plantId);
+      if (plantIdx < 0) return { ok:false, error:"Bad plant" };
+      const planted = p.towers[plantIdx];
+      if (isFarm(planted)) return { ok:false, error:"Cannot plant Farm" };
+      if (towerTier(planted.name) === "S") return { ok:false, error:"Cannot plant S-tier" };
+      const stolen = removeTowerAt(oppP, idx);
+      removeTowerAt(p, plantIdx);
+      addTower(p, stolen.name);
+      addTower(oppP, planted.name);
+      state.pool = state.pool.filter(x => x !== stolen.name);
+      p.removedCount++;
+      log(state, `Plunder: ${p.name} took ${stolen.name}, planted ${planted.name}`);
+      return { ok:true, meta:{ name: stolen.name } };
+    }
+    case "Veto": {
+      if (!rulingUndo) return { ok:false, error:"Nothing to Veto" };
+      const lr = state.lastRuling;
+      if (!lr || lr.by === actor) return { ok:false, error:"No opponent ruling to Veto" };
+      if (rulingUndoSeq !== null && rulingUndoSeq !== (state.actionSeq||0)) return { ok:false, error:"Too late to Veto — another action already happened" };
+      if (lr.warded) {
+        log(state, `Veto blocked by Ward`);
+        return { ok:true };
+      }
+      let prev;
+      try { prev = JSON.parse(rulingUndo); } catch(e) { return { ok:false, error:"Veto unavailable" }; }
+      Object.keys(state).forEach(k => delete state[k]);
+      Object.assign(state, prev);
+      log(state, `Veto cancelled ${lr.ruling}`);
+      return { ok:true };
+    }
+    case "Pact": {
+      let did = 0;
+      ["P1","P2"].forEach(seat => {
+        const pl = state.players[seat];
+        if (!pl.rulings.length) return;
+        let best = 0;
+        pl.rulings.forEach((rr, i) => { if (RULINGS[rr].cost > RULINGS[pl.rulings[best]].cost) best = i; });
+        const removed = pl.rulings.splice(best, 1)[0];
+        pl.spent.push(removed);
+        log(state, `Pact: ${pl.name} discarded ${removed}`);
+        did++;
+      });
+      if (did === 0) return { ok:false, error:"Neither has unused rulings" };
+      return { ok:true };
+    }
+    case "Clarity": {
+      state.clarityActive = true;
+      state.players.P1.hidden = [];
+      state.players.P2.hidden = [];
+      log(state, `Clarity: all hidden towers revealed`);
+      return { ok:true };
+    }
+    case "Ascend": {
+      const chosenIdx = idxOf(p, target);
+      if (chosenIdx < 0) return { ok:false, error:"Bad target" };
+      if (isFarm(p.towers[chosenIdx])) return { ok:false, error:"Cannot ascend Farm" };
+      if (towerTier(p.towers[chosenIdx].name) === "S") return { ok:false, error:"Already S-tier" };
+      const want = action.want;
+      if (!TOWERS.includes(want) || towerTier(want) !== "S") return { ok:false, error:"Must be S-tier" };
+      if (!state.pool.includes(want)) return { ok:false, error:"Not in pool" };
+      if (countS(p) >= 1) return { ok:false, error:"S-tier cap" };
+      const oldName = p.towers[chosenIdx].name;
+      removeTowerAt(p, chosenIdx);
+      state.pool = state.pool.filter(x => x !== want);
+      state.pool = [...new Set([...state.pool, oldName])];
+      addTower(p, want);
+      log(state, `Ascend: ${oldName} → ${want}`);
+      return { ok:true };
+    }
+    case "Doom": {
+      if (p.removedCount >= CAPS.removals) return { ok:false, error:"Removal cap" };
+      if (oppP.riposteActive) { oppP.riposteActive = false; log(state, `Riposte negated Doom`); return { ok:true }; }
+      let worstIdx = -1, worstTier = -1;
+      oppP.towers.forEach((t, i) => {
+        if (isFarm(t)) return;
+        const rank = TIER_RANK[towerTier(t.name)] || 0;
+        if (rank > worstTier) { worstTier = rank; worstIdx = i; }
+      });
+      if (worstIdx < 0) return { ok:false, error:"No target" };
+      const name = oppP.towers[worstIdx].name;
+      removeTowerAt(oppP, worstIdx);
+      state.removed[opp].push(name);
+      p.removedCount++;
+      oppP.pendingReplacement++;
+      log(state, `Doom: ${oppP.name} lost ${name}`);
+      return { ok:true };
+    }
+    case "Ruin": {
+      if (p.removedCount >= CAPS.removals) return { ok:false, error:"Removal cap" };
+      if (oppP.riposteActive) { oppP.riposteActive = false; log(state, `Riposte negated Ruin`); return { ok:true }; }
+      const targets = oppP.towers
+        .map((t, i) => ({ i, name:t.name, rank:TIER_RANK[towerTier(t.name)] || 0, farm:isFarm(t) }))
+        .filter(x => !x.farm)
+        .sort((a, b) => b.rank - a.rank)
+        .slice(0, 2);
+      if (!targets.length) return { ok:false, error:"No targets" };
+      targets.sort((a, b) => b.i - a.i).forEach(t => {
+        const removed = removeTowerAt(oppP, t.i);
+        state.removed[opp].push(removed.name);
+        oppP.pendingReplacement++;
+      });
+      p.removedCount++;
+      log(state, `Ruin: ${oppP.name} lost ${targets.map(t => t.name).join(" and ")}`);
+      return { ok:true };
+    }
+    case "Amnesty": {
+      ["P1","P2"].forEach(seat => {
+        const pl = state.players[seat];
+        const cap = (seat === actor) ? CAPS.slots + 1 : CAPS.slots;
+        while (pl.spent.length && pl.rulings.length < cap) {
+          pl.rulings.push(pl.spent.pop());
+        }
+      });
+      log(state, `Amnesty: both players regained spent rulings`);
+      return { ok:true };
+    }
+    case "Purge": {
+      if (p.removedCount >= CAPS.removals) return { ok:false, error:"Removal cap" };
+      if (oppP.riposteActive) { oppP.riposteActive = false; log(state, `Riposte negated Purge`); return { ok:true }; }
+      const victims = oppP.towers.filter(t => !isFarm(t) && !isProtected(oppP, t.id));
+      if (!victims.length) return { ok:false, error:"No unprotected towers" };
+      victims.slice().reverse().forEach(v => {
+        const idx = idxOf(oppP, v.id);
+        if (idx < 0) return;
+        removeTowerAt(oppP, idx);
+        state.removed[opp].push(v.name);
+        oppP.pendingReplacement++;
+      });
+      p.removedCount++;
+      log(state, `Purge: ${oppP.name} lost ${victims.length} tower(s)`);
+      return { ok:true };
+    }
+    default: return { ok:false, error:"Unhandled ruling" };
+  }
+}
+function finalizeResults(state) {
+  const p1 = state.players.P1.result, p2 = state.players.P2.result;
+  state.phase = "final";
+  state.reportDeadline = null;
+  if (p1 === "tech" || p2 === "tech") { state.outcome = { type:"technical", winner:null }; return; }
+  if (p1 === "win" && p2 === "loss") state.outcome = { type:"win", winner:"P1" };
+  else if (p1 === "loss" && p2 === "win") state.outcome = { type:"win", winner:"P2" };
+  else state.outcome = { type:"void", reason:"Players disagreed" };
+}
+let rulingTimerInterval = null, rulingTimerKey = null;
+let draftTimerInterval = null, draftTimerKey = null;
+let banTimerInterval = null, banTimerKey = null;
+let reportCountdownInterval = null;
+let reportCountdownKey = null;
+function startRulingTimer(seconds, key, onExpire) {
+  if (rulingTimerKey === key) return;
+  rulingTimerKey = key;
+  if (rulingTimerInterval) clearInterval(rulingTimerInterval);
+  const el = $("#rulingTimer");
+  let t = seconds; el.textContent = t; el.className = "timer";
+  rulingTimerInterval = setInterval(() => {
+    t--; el.textContent = Math.max(0, t);
+    if (t <= 30) el.className = "timer warn";
+    if (t <= 10) el.className = "timer danger";
+    if (t <= 0) { clearInterval(rulingTimerInterval); rulingTimerInterval = null; if (onExpire) onExpire(); }
+  }, 1000);
+}
+function startDraftTimer(seconds, key, onExpire) {
+  if (draftTimerKey === key) return;
+  draftTimerKey = key;
+  if (draftTimerInterval) clearInterval(draftTimerInterval);
+  const el = $("#draftTimer");
+  let t = seconds; el.textContent = t; el.className = "timer";
+  draftTimerInterval = setInterval(() => {
+    t--; el.textContent = Math.max(0, t);
+    if (t <= 10) el.className = "timer warn";
+    if (t <= 5) el.className = "timer danger";
+    if (t <= 0) { clearInterval(draftTimerInterval); draftTimerInterval = null; if (onExpire) onExpire(); }
+  }, 1000);
+}
+function startBanTimer(seconds, key, onExpire) {
+  if (banTimerKey === key) return;
+  banTimerKey = key;
+  if (banTimerInterval) clearInterval(banTimerInterval);
+  const el = $("#banTimer");
+  let t = seconds; el.textContent = t; el.className = "timer";
+  banTimerInterval = setInterval(() => {
+    t--; el.textContent = Math.max(0, t);
+    if (t <= 10) el.className = "timer warn";
+    if (t <= 5) el.className = "timer danger";
+    if (t <= 0) { clearInterval(banTimerInterval); banTimerInterval = null; if (onExpire) onExpire(); }
+  }, 1000);
+}
+function startReportCountdown() {
+  const key = `rc:${G.state && G.state.matchId}`;
+  if (reportCountdownKey === key) return;
+  reportCountdownKey = key;
+  const el = $("#resultCountdown");
+  if (reportCountdownInterval) clearInterval(reportCountdownInterval);
+  reportCountdownInterval = setInterval(() => {
+    if (!G.state || G.state.phase !== "result" || !G.state.reportDeadline) {
+      clearInterval(reportCountdownInterval);
+      reportCountdownInterval = null;
+      reportCountdownKey = null;
+      return;
+    }
+    const left = Math.max(0, Math.round((G.state.reportDeadline - now()) / 1000));
+    el.style.display = "block";
+    el.textContent = "⏱ " + left + "s remaining. If opponent doesn't respond, your report stands.";
+    if (left <= 0) {
+      clearInterval(reportCountdownInterval);
+      reportCountdownInterval = null;
+      reportCountdownKey = null;
+      if (G.state.mode === "offline") {
+        const res = applyAction(G.state, { type:"AUTO_RESOLVE_REPORT" }, offlineActor());
+        if (res.ok) render();
+      } else if (G.isHost) {
+        const res = applyAction(G.state, { type:"AUTO_RESOLVE_REPORT" }, G.mySeat);
+        if (res.ok) { broadcastState(); render(); }
+      } else if (G.conn && G.conn.open) {
+        G.conn.send({ type:"ACTION", action:{ type:"AUTO_RESOLVE_REPORT" } });
+      }
+    }
+  }, 1000);
+}
+function stopTimers() {
+  if (rulingTimerInterval) { clearInterval(rulingTimerInterval); rulingTimerInterval = null; }
+  rulingTimerKey = null;
+  if (draftTimerInterval) { clearInterval(draftTimerInterval); draftTimerInterval = null; }
+  draftTimerKey = null;
+  if (banTimerInterval) { clearInterval(banTimerInterval); banTimerInterval = null; }
+  banTimerKey = null;
+  if (reportCountdownInterval) { clearInterval(reportCountdownInterval); reportCountdownInterval = null; }
+  reportCountdownKey = null;
+}
+function hideAll() { $$("main > section").forEach(e => e.hidden = true); }
+function show(id) { $("#" + id).hidden = false; }
+function refreshView() {
+  if (!G.state) { G.view = null; return; }
+  if (G.state.mode === "offline") { G.view = G.state; return; }
+  G.view = redactFor(G.state, G.mySeat);
+}
+function render() {
+  const s0 = G.state;
+  if (!s0) { stopTimers(); renderLanding(); return; }
+  refreshView();
+  const s = G.view;
+  if (lastRenderedPhase !== null && lastRenderedPhase !== s.phase) {
+    if (s.phase === "ban") Sound.ban();
+    else if (s.phase === "reveal") Sound.reveal();
+  }
+  lastRenderedPhase = s.phase;
+  $("#phaseBadge").textContent = s.phase.charAt(0).toUpperCase() + s.phase.slice(1);
+  if (!["rulings","draft","result","ban"].includes(s.phase)) stopTimers();
+  hideAll();
+  switch (s.phase) {
+    case "landing": renderLanding(); break;
+    case "waiting": renderWaiting(); break;
+    case "coin": renderCoin(); break;
+    case "config": renderConfig(); break;
+    case "ban": renderBan(); break;
+    case "rulings": renderRulings(); break;
+    case "reveal": renderReveal(); break;
+    case "draft": renderDraft(); break;
+    case "handoff": renderHandoff(); break;
+    case "result": renderResult(); break;
+    case "final": renderFinal(); break;
+    default: renderLanding();
+  }
+}
+function renderLanding() {
+  show("s-landing");
+  checkHttpsForOnline();
+  const p = Player.load();
+  const r = getRank(p.online.mmr);
+  $("#landingStats").innerHTML = `
+    <div class="grid2">
+      <div class="loadout">
+        <h3 style="margin-top:0">Offline (casual)</h3>
+        <div>W:${p.offline.wins} · L:${p.offline.losses} · Tech/Void:${p.offline.techVoid}</div>
+        <div>Matches: ${p.offline.matches}</div>
+        <div class="muted" style="font-size:12px;margin-top:6px">Does not affect ranked MMR.</div>
+      </div>
+      <div class="loadout">
+        <h3 style="margin-top:0">Online — Provisional MMR <span class="pill">Unverified</span></h3>
+        <div><b>${esc(r.icon)} ${esc(r.name)}</b> — ${p.online.mmr} MMR (peak ${p.online.peakMmr})</div>
+        <div>W:${p.online.wins} · L:${p.online.losses} · Tech/Void:${p.online.techVoid} · Streak ${p.online.streak}</div>
+        <div>Matches: ${p.online.matches} · Placements left: ${p.online.placementsLeft}</div>
+        <div class="muted" style="font-size:12px;margin-top:6px">Honor-system reports. Not official ranked MMR.</div>
+      </div>
+    </div>`;
+}
+function renderWaiting() {
+  show("s-waiting");
+  $("#roomCodeDisplay").textContent = G.roomCode || "------";
+}
+function renderCoin() {
+  show("s-coin");
+  const s = G.view;
+  const myCommit = s.coin.commits[G.mySeat];
+  if (s.coin.winner) {
+    $("#coinResult").textContent = `Winner: ${s.players[s.coin.winner].name}`;
+    const canChoose = s.coin.winner === G.mySeat || s.mode === "offline";
+    if (canChoose) {
+      $("#btnFlip").hidden = true;
+      $("#choiceBox").hidden = false;
+      $("#winnerName").textContent = s.players[s.coin.winner].name;
+    } else {
+      $("#btnFlip").hidden = true;
+      $("#choiceBox").hidden = true;
+    }
+  } else {
+    $("#choiceBox").hidden = true;
+    if (s.mode === "offline") {
+      const actor = offlineActor();
+      $("#coinResult").textContent = `${s.players[actor].name}, click to flip`;
+      $("#btnFlip").hidden = false;
+    } else {
+      if (myCommit) { $("#coinResult").textContent = "Waiting…"; $("#btnFlip").hidden = true; }
+      else { $("#coinResult").textContent = "Click to flip"; $("#btnFlip").hidden = false; }
+    }
+  }
+}
+function renderConfig() {
+  show("s-config");
+  const s = G.view;
+  $("#cfgMode").textContent = s.mode === "offline" ? "Offline" : (s.unranked ? "Online (Unranked)" : "Online");
+  $("#cfgDraftType").textContent = s.draftType === "Close" ? "Close — 2 picks/turn × 2 turns" : "Open — 1 pick/turn × 4 turns";
+  const actor = s.mode === "offline" ? offlineActor() : G.mySeat;
+  $("#btnConfirmConfig").disabled = s.players[actor].ready;
+  $("#configConfirmStatus").textContent = `${s.players.P1.name}: ${s.players.P1.ready ? "✅" : "⏳"} · ${s.players.P2.name}: ${s.players.P2.ready ? "✅" : "⏳"}`;
+}
+function renderBan() {
+  show("s-ban");
+  const s = G.view;
+  const actor = s.mode === "offline" ? offlineActor() : G.mySeat;
+  const me = s.players[actor];
+  const oppSeat = actor === "P1" ? "P2" : "P1";
+  const opp = s.players[oppSeat];
+  $("#banYourChoice").textContent = me.banChoice || "Not chosen";
+  $("#banYourChoice").className = me.banChoice ? "" : "muted";
+  $("#banOppChoice").textContent = opp.banChoice || "Waiting…";
+  $("#banOppChoice").className = opp.banChoice ? "" : "muted";
+  const grid = $("#banGrid");
+  grid.innerHTML = "";
+  TOWERS.forEach(t => {
+    const btn = document.createElement("button");
+    const isBanned = s.poolBanned.includes(t);
+    const isFarmBtn = t === FARM;
+    const tier = towerTier(t);
+    btn.className = `${tier.toLowerCase()}tier` + (isBanned ? " banned" : "");
+    btn.textContent = `${t} [${tier}]`;
+    btn.disabled = isBanned || isFarmBtn || me.banChoice !== null;
+    btn.onclick = () => { Sound.warn(); sendAction({ type:"BAN_TOWER", tower:t }); };
+    grid.appendChild(btn);
+  });
+  const alreadyBanned = me.banChoice !== null && opp.banChoice !== null;
+  if (!alreadyBanned) {
+    startBanTimer(30, `b:${s.matchId}`, () => {
+      if (me.banChoice === null) sendAction({ type:"AUTO_BAN" });
+    });
+  }
+}
+function renderRulings() {
+  show("s-rulings");
+  const s = G.view;
+  const actor = s.mode === "offline" ? offlineActor() : G.mySeat;
+  const me = s.players[actor];
+  const list = $("#rulingsList");
+  list.innerHTML = "";
+  const myCost = me.rulings.reduce((a,r) => a + RULINGS[r].cost, 0);
+  const pointsLeft = CAPS.points - myCost;
+  const slotsLeft = CAPS.slots - me.rulings.length;
+  let availableCount = 0;
+  const exp = experienceLevel();
+  const allowedTiers = exp < 5 ? ["Easy"] : exp < 15 ? ["Easy","Moderate"] : exp < 30 ? ["Easy","Moderate","Hard","Insane"] : ["Easy","Moderate","Hard","Insane","Curse"];
+  ["Easy","Moderate","Hard","Insane","Curse"].forEach(tier => {
+    if (!allowedTiers.includes(tier)) return;
+    const h = document.createElement("div");
+    h.style.cssText = "margin:12px 0 4px;font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase";
+    h.textContent = `${tier} tier`;
+    list.appendChild(h);
+    RULING_ORDER.filter(r => RULINGS[r].tier === tier).forEach(r => {
+      const info = RULINGS[r];
+      const affordable = info.cost <= pointsLeft && slotsLeft > 0 && !me.rulings.includes(r);
+      if (affordable) availableCount++;
+      const div = document.createElement("div");
+      div.className = "ruling " + tier.toLowerCase() + (me.rulings.includes(r) ? " selected" : "");
+      div.innerHTML = `<b>${esc(r)} <span class="pill" style="float:right">${info.cost} pt</span></b><small>${esc(info.desc)}</small><small class="tip">💡 ${esc(info.tip)}</small>`;
+      div.onclick = () => {
+        if (me.locked) { Sound.warn(); toast("Portfolio locked", "warn"); return; }
+        if (me.rulings.includes(r)) { Sound.warn(); toast("Already in your portfolio", "warn"); return; }
+        if (slotsLeft <= 0) { Sound.warn(); toast("No slots left (3/3 used)", "warn"); return; }
+        if (info.cost > pointsLeft) { Sound.warn(); toast(`Not enough points — need ${info.cost}, have ${pointsLeft}`, "warn"); return; }
+        Sound.pick();
+        sendAction({ type:"ADD_RULING", ruling:r });
+      };
+      list.appendChild(div);
+    });
+  });
+  $("#rulingCount").textContent = availableCount;
+  $("#selList").textContent = me.rulings.map(r => `${r}(${RULINGS[r].cost})`).join(", ") || "None";
+  $("#spentList").textContent = me.spent.length ? me.spent.map(r => `${r}(${RULINGS[r].cost})`).join(", ") : "None";
+  $("#selCost").textContent = myCost;
+  $("#selSlots").textContent = me.rulings.length;
+  $("#btnLock").disabled = me.locked;
+  const other = actor === "P1" ? s.players.P2 : s.players.P1;
+  $("#rulingLockStatus").textContent = me.locked ? `Locked in. Waiting for ${other.name}…` : `${me.name}'s portfolio — build it, then lock.`;
+  startRulingTimer(90, `r:${s.matchId}`, () => {
+    if (!me.locked) sendAction({ type:"LOCK_RULING" });
+  });
+}
+function renderReveal() {
+  show("s-reveal");
+  const s = G.view;
+  $("#revP1Name").textContent = s.players.P1.name;
+  $("#revP2Name").textContent = s.players.P2.name;
+  $("#revP1Rulings").innerHTML = s.players.P1.rulings.map(r => `<span class="tower" title="${esc(RULINGS[r].desc)} — Tip: ${esc(RULINGS[r].tip)}">${esc(r)} (${RULINGS[r].cost})</span>`).join("") || "<em>None</em>";
+  $("#revP2Rulings").innerHTML = s.players.P2.rulings.map(r => `<span class="tower" title="${esc(RULINGS[r].desc)} — Tip: ${esc(RULINGS[r].tip)}">${esc(r)} (${RULINGS[r].cost})</span>`).join("") || "<em>None</em>";
+}
+function towerPill(t, isHidden, isProt, isMarked) {
+  const tier = towerTier(isHidden ? "Scout" : t.name);
+  const cls = `tower ${isProt?"protected ":""}${isHidden?"hidden ":""}${isMarked?"marked ":""}pill-${tier.toLowerCase()}`;
+  const label = isHidden ? "❓ Hidden" : esc(t.name);
+  return `<span class="${cls}">${label}${isProt ? " 🛡" : ""}${isMarked ? " 🎯" : ""}</span>`;
+}
+function buildCounters(me, opp) {
+  const chips = [];
+  chips.push(`<span class="counterChip ${me.removedCount >= CAPS.removals ? 'full' : 'ok'}">Removals: ${me.removedCount}/${CAPS.removals}</span>`);
+  chips.push(`<span class="counterChip ${me.hidden.length >= CAPS.hidden ? 'full' : 'ok'}">Hidden: ${me.hidden.length}/${CAPS.hidden}</span>`);
+  const prot = Object.keys(me.protectedUntil).length;
+  chips.push(`<span class="counterChip ${prot >= CAPS.protected ? 'full' : 'ok'}">Protected: ${prot}/${CAPS.protected}</span>`);
+  chips.push(`<span class="counterChip">Bans: ${me.banChoice ? 1 : 0}/${CAPS.bans}</span>`);
+  chips.push(`<span class="counterChip" style="margin-left:auto;opacity:.7">Opp removals: ${opp.removedCount}/${CAPS.removals}</span>`);
+  return chips.join("");
+}
+function renderDraft() {
+  show("s-draft");
+  const s = G.view;
+  const actor = s.mode === "offline" ? offlineActor() : G.mySeat;
+  const me = s.players[actor];
+  const oppSeat = actor === "P1" ? "P2" : "P1";
+  const opp = s.players[oppSeat];
+  const myTurn = s.turn === actor;
+  const forcedNote = (s.forcedPick && s.forcedPick.forSeat === actor) ? ` · ⚠ Forced: ${esc(s.forcedPick.tower)}` : "";
+  const who = s.mode === "offline" ? (myTurn ? `${me.name}'s turn` : `${s.players[s.turn].name}'s turn`) : (myTurn ? "Your turn" : `${s.players[s.turn].name}'s turn`);
+  const thinking = (!myTurn && s.mode === "online") ? '<span class="thinking"></span>' : "";
+  $("#turnLabel").innerHTML = `Round ${s.round} · ${who}${forcedNote}${thinking}`;
+  $("#priorityBadge").textContent = s.firstPicker === actor ? "First Pick" : "Second Pick";
+  $("#scoreP1Name").textContent = s.players.P1.name;
+  $("#scoreP2Name").textContent = s.players.P2.name;
+  $("#scoreP1").textContent = draftedCount(s.players.P1);
+  $("#scoreP2").textContent = draftedCount(s.players.P2);
+  const banners = [];
+  if (me.lockedRulingsUntil >= s.round) banners.push("🔒 You are Silenced — cannot use rulings this turn");
+  if (me.jinxed) banners.push("💀 You are Jinxed — using a ruling will cost you another");
+  if (me.frozenUntil >= s.round) banners.push(`🧊 ${me.frozenType} is Frozen this round`);
+  $("#statusBanners").innerHTML = banners.map(b => `<div class="statusbanner">${b}</div>`).join("");
+  $("#counterRow").innerHTML = buildCounters(me, opp);
+  const grid = $("#towerGrid");
+  grid.innerHTML = "";
+  let hotkeyIdx = 0;
+  TOWERS.forEach((t) => {
+    const btn = document.createElement("button");
+    const isBanned = s.poolBanned.includes(t);
+    const isTaken = !s.pool.includes(t);
+    const tier = towerTier(t);
+    btn.className = `${tier.toLowerCase()}tier` + (isTaken ? " picked" : "") + (isBanned ? " banned" : "");
+    const enabled = !isBanned && !isTaken && myTurn && draftedCount(me) < CAPS.towers;
+    let hotkey = "";
+    if (enabled && hotkeyIdx < 10) {
+      const label = hotkeyIdx === 9 ? 0 : hotkeyIdx + 1;
+      hotkey = `[${label}] `;
+    }
+    if (enabled) hotkeyIdx++;
+    btn.textContent = `${hotkey}${t} [${tier}]`;
+    btn.disabled = !enabled;
+    btn.onclick = () => { Sound.pick(); sendAction({ type:"PICK", tower:t }); };
+    grid.appendChild(btn);
+  });
+  const lw = $("#loadoutWrap");
+  lw.innerHTML = "";
+  ["P1","P2"].forEach(seat => {
+    const p = s.players[seat];
+    const isMe = seat === actor;
+    const pills = p.towers.map(t => {
+      const isHidden = !t.name;
+      const isProt = isProtected(p, t.id);
+      const isMarked = p.markedId === t.id;
+      return towerPill(t, isHidden, isProt, isMarked);
+    }).join("");
+    const bonus = p.bonusPicks ? ` <span class="pill">+${p.bonusPicks} extra</span>` : "";
+    const need = p.pendingReplacement > 0 ? ` <span class="needs">⚠ re-pick ${p.pendingReplacement}</span>` : "";
+    lw.innerHTML += `<div class="loadout"><b>${esc(p.name)}${isMe ? " (you)" : ""}</b>${bonus}${need}<div>${pills || "<em>Empty</em>"}</div></div>`;
+  });
+  const rb = $("#rulingButtons");
+  rb.innerHTML = "";
+  if (!me.rulings.length) rb.innerHTML = `<div class="muted" style="font-size:13px">No unused rulings.</div>`;
+  me.rulings.forEach(r => {
+    const b = document.createElement("button");
+    b.className = "secondary tiny";
+    b.textContent = `${r} (${RULINGS[r].cost})`;
+    const frozen = me.frozenUntil >= s.round && me.frozenType === r;
+    const locked = me.lockedRulingsUntil >= s.round;
+    b.disabled = !myTurn || frozen || locked;
+    if (frozen) b.textContent += " 🧊";
+    if (locked) b.textContent += " 🔒";
+    b.onclick = () => { Sound.click(); promptUseRuling(r); };
+    rb.appendChild(b);
+  });
+  const rem = $("#removedWrap");
+  rem.innerHTML = `<div class="removeline">
+    <div><b>${esc(s.players.P1.name)} lost:</b> ${s.removed.P1.map(esc).join(", ") || "—"}</div>
+    <div><b>${esc(s.players.P2.name)} lost:</b> ${s.removed.P2.map(esc).join(", ") || "—"}</div>
+    ${s.poolBanned.length ? `<div><b>Banned:</b> ${s.poolBanned.map(esc).join(", ")}</div>` : ""}
+  </div>`;
+  const logEl = $("#log");
+  const atBottom = logEl.scrollHeight - logEl.scrollTop - logEl.clientHeight < 40;
+  logEl.innerHTML = s.log.slice(-40).map(l => `<div>${new Date(l.t).toLocaleTimeString()} — ${esc(l.msg)}</div>`).join("");
+  if (atBottom) logEl.scrollTop = logEl.scrollHeight;
+  const chatWrap = $("#chatWrap");
+  if (s.mode === "online") {
+    chatWrap.hidden = false;
+    const cl = $("#chatLog");
+    const arr = s.chat || [];
+    const chatBottom = cl.scrollHeight - cl.scrollTop - cl.clientHeight < 40;
+    cl.innerHTML = arr.slice(-30).map(c => {
+      const mine = c.sender === actor;
+      return `<div><b style="color:${mine ? "var(--blue)" : "var(--muted)"}">${esc(c.name)}:</b> ${esc(c.msg)}</div>`;
+    }).join("") || `<div class="muted">No messages yet.</div>`;
+    if (chatBottom) cl.scrollTop = cl.scrollHeight;
+    const er = $("#emoteRow");
+    if (!er.dataset.built) {
+      er.innerHTML = EMOTES.map(e => `<button data-emote="${e}">${e}</button>`).join("");
+      er.querySelectorAll("button").forEach(b => {
+        b.onclick = () => { Sound.chat(); sendChat(b.dataset.emote); };
+      });
+      er.dataset.built = "1";
+    }
+  } else {
+    chatWrap.hidden = true;
+  }
+  const turnP = s.players[s.turn];
+  const secs = turnP.timerHalved ? 15 : 30;
+  startDraftTimer(secs, `d:${s.matchId}:${s.round}:${s.turn}`, () => {
+    if (s.mode === "offline") {
+      const a = offlineActor();
+      const res = applyAction(G.state, { type:"AUTO_PASS_TURN" }, a);
+      if (res.ok) render();
+    } else if (G.isHost) {
+      const a = s.turn;
+      const res = applyAction(G.state, { type:"AUTO_PASS_TURN" }, a);
+      if (res.ok) { broadcastState(); render(); }
+    } else if (s.turn === G.mySeat) {
+      sendAction({ type:"AUTO_PASS_TURN" });
+    }
+  });
+  const turnKey = `${s.matchId}:${s.round}:${s.turn}`;
+  if (turnKey !== lastTurnKey) {
+    lastTurnKey = turnKey;
+    if (myTurn) Sound.turn();
+    else if (s.mode === "online") Sound.opponent();
+  }
+}
+function promptUseRuling(r) {
+  const s = G.view;
+  const actor = s.mode === "offline" ? offlineActor() : G.mySeat;
+  const me = s.players[actor];
+  const oppSeat = actor === "P1" ? "P2" : "P1";
+  const opp = s.players[oppSeat];
+  const opts = [];
+  let promptR = r;
+  if (r === "Graft" || r === "Echo") {
+    const lr = r === "Graft" ? s.lastRuling : (s.lastRuling && s.lastRuling.by === actor ? s.lastRuling : null);
+    if (!lr) { toast("No ruling to copy", "warn"); return; }
+    if (["Graft","Veto"].includes(lr.ruling)) { toast("Cannot copy that", "warn"); return; }
+    if (!RULINGS[lr.ruling]) { toast("Cannot copy that", "warn"); return; }
+    if (r === "Graft" && RULINGS[lr.ruling].cost > RULINGS.Graft.cost) { toast("Cost too high", "warn"); return; }
+    promptR = lr.ruling;
+  }
+  const sendR = extra => sendAction(Object.assign({ type:"USE_RULING", ruling:r }, extra || {}));
+  const addOpt = (label, extra) => opts.push({ label, onClick: () => sendR(extra) });
+  if (["Change","Hide","Cloak","Anchor","Secure","Fracture","Martyr"].includes(promptR)) {
+    me.towers.forEach(t => {
+      if (["Change","Martyr"].includes(promptR) && isFarm(t)) return;
+      if (["Anchor","Secure","Hide","Cloak","Fracture"].includes(promptR) && isFarm(t)) return;
+      const extra = me.hidden.includes(t.id) ? " (hidden)" : "";
+      addOpt(`${t.name}${extra}`, { target:t.id });
+    });
+  } else if (promptR === "Shift") {
+    const mine = me.towers.filter(t => !isFarm(t) && towerTier(t.name) !== "S");
+    if (!mine.length) { toast("No shiftable tower", "warn"); return; }
+    modal("Shift — choose your tower", "<p>Pick a non-S tower.</p>",
+      mine.map(t => ({ label:`${t.name} [${towerTier(t.name)}]`, close:true, onClick:() => {
+        const tier = towerTier(t.name);
+        const poolSame = s.pool.filter(x => towerTier(x) === tier);
+        if (!poolSame.length) { toast("No same-tier in pool", "warn"); return; }
+        modal(`Shift → pick a ${tier}`, "<p>Choose replacement.</p>",
+          poolSame.map(w => ({ label:w, close:true, onClick:() => sendR({ target:t.id, want:w }) })));
+      }})));
+    return;
+  } else if (promptR === "Duplicate") {
+    const mine = me.towers.filter(t => !isFarm(t) && towerTier(t.name) !== "S" && s.pool.includes(t.name));
+    if (!mine.length) { toast("No duplicable tower", "warn"); return; }
+    mine.forEach(t => addOpt(`${t.name}`, { target:t.id }));
+  } else if (promptR === "Revive") {
+    if (!s.poolBanned.length) { toast("No banned towers", "warn"); return; }
+    s.poolBanned.forEach(t => addOpt(t, { target:t }));
+  } else if (promptR === "Peek") {
+    opp.towers.forEach(t => {
+      if (!opp.hidden.includes(t.id)) return;
+      addOpt(`${t.name || "?"} (hidden)`, { target:t.id });
+    });
+    if (!opts.length) { toast("Opponent has no hidden towers", "warn"); return; }
+  } else if (["Inspect","Haven","Amnesty","Clarity","Ruin","Purge","Silence","Jinx","Ward","Riposte","Turn","Pass","Delay","Rebel"].includes(promptR)) {
+    addOpt("Use", {});
+  } else if (promptR === "Extort") {
+    if (!opp.rulings.length) { toast("Opponent has no rulings", "warn"); return; }
+    opp.rulings.forEach(rr => addOpt(rr, { target:rr }));
+  } else if (promptR === "Dictate" || promptR === "Force") {
+    s.pool.forEach(t => addOpt(t, { target:t }));
+  } else if (promptR === "Plunder") {
+    const mine = me.towers.filter(t => !isFarm(t) && towerTier(t.name) !== "S");
+    const theirs = opp.towers.filter(o => !isFarm(o) && !isProtected(opp, o.id));
+    if (!mine.length) { toast("No tower to plant", "warn"); return; }
+    if (!theirs.length) { toast("No stealable tower", "warn"); return; }
+    modal("Plunder — steal", "<p>Pick an unprotected opponent tower.</p>",
+      theirs.map(o => ({ label:o.name || "(hidden)", close:true, onClick:() => {
+        modal("Plunder — plant", "<p>Pick a non-S tower of yours to give them.</p>",
+          mine.map(m => ({ label:m.name, close:true, onClick:() => sendR({ stealId:o.id, plantId:m.id }) })));
+      }})));
+    return;
+  } else if (promptR === "Ascend") {
+    const mine = me.towers.filter(t => !isFarm(t) && towerTier(t.name) !== "S");
+    if (!mine.length) { toast("No non-S tower", "warn"); return; }
+    modal("Ascend — choose tower", "<p>Pick the tower to transform.</p>",
+      mine.map(t => ({ label:`${t.name} [${towerTier(t.name)}]`, close:true, onClick:() => {
+        const poolS = s.pool.filter(x => towerTier(x) === "S");
+        if (!poolS.length) { toast("No S-tier in pool", "warn"); return; }
+        modal("Ascend → choose S-tier", "<p>Pick the S-tier result.</p>",
+          poolS.map(w => ({ label:w, close:true, onClick:() => sendR({ target:t.id, want:w }) })));
+      }})));
+    return;
+  } else if (promptR === "Bounty") {
+    if (me.spent.length && me.rulings.length < CAPS.slots) addOpt("Refund spent ruling", { target:"refund" });
+    opp.towers.forEach(t => {
+      if (!opp.hidden.includes(t.id)) return;
+      addOpt(`${t.name || "?"} (hidden)`, { target:t.id });
+    });
+  } else if (promptR === "Probe") {
+    opp.towers.forEach(t => {
+      if (!opp.hidden.includes(t.id)) return;
+      addOpt(`${t.name || "?"} (hidden)`, { target:t.id });
+    });
+  } else if (["Mark","Evict","Steal"].includes(promptR)) {
+    opp.towers.forEach(t => {
+      if (isFarm(t)) return;
+      addOpt(t.name || "(hidden)", { target:t.id });
+    });
+  } else if (promptR === "Delete") {
+    s.pool.forEach(t => addOpt(t, { target:t }));
+  } else if (promptR === "Freeze") {
+    RULING_ORDER.forEach(t => addOpt(t, { target:t }));
+  } else if (promptR === "Snatch") {
+    if (!opp.rulings.length) { toast("Opponent has no rulings", "warn"); return; }
+    opp.rulings.forEach(rr => addOpt(rr, { target:rr }));
+  } else if (promptR === "Trade") {
+    const mine = me.towers.filter(t => !isFarm(t) && !me.hidden.includes(t.id) && !isProtected(me, t.id));
+    if (!mine.length) { toast("No tradable tower", "warn"); return; }
+    modal("Trade — your tower", "<p>Pick one of your towers.</p>",
+      mine.map(t => ({ label:t.name, close:true, onClick:() => {
+        const theirs = opp.towers.filter(o => !isFarm(o) && !opp.hidden.includes(o.id) && !isProtected(opp, o.id));
+        if (!theirs.length) { toast("Opponent has no tradable", "warn"); return; }
+        modal("Trade — their tower", "<p>Pick their tower.</p>",
+          theirs.map(o => ({ label:o.name || "(hidden)", close:true, onClick:() => sendR({ myId:t.id, oppId:o.id }) })));
+      }})));
+    return;
+  } else if (promptR === "Fuse") {
+    const mine = me.towers.filter(t => towerTier(t.name) !== "S" && !isFarm(t));
+    if (mine.length < 2) { toast("Need 2 non-S towers", "warn"); return; }
+    modal("Fuse — first tower", "<p>Pick the first non-S tower.</p>",
+      mine.map(a => ({ label:a.name, close:true, onClick:() => {
+        modal("Fuse — second tower", "<p>Pick a different non-S tower.</p>",
+          mine.filter(b => b.id !== a.id).map(b => ({ label:b.name, close:true, onClick:() => {
+            const poolS = s.pool.filter(x => towerTier(x) === "S");
+            if (!poolS.length) { toast("No S-tier in pool", "warn"); return; }
+            modal("Fuse — S-tier result", "<p>Pick the S-tier.</p>",
+              poolS.map(sT => ({ label:sT, close:true, onClick:() => sendR({ i1:a.id, i2:b.id, want:sT }) })));
+          }})));
+      }})));
+    return;
+  } else if (promptR === "Split") {
+    const sTowers = me.towers.filter(t => towerTier(t.name) === "S");
+    if (!sTowers.length) { toast("No S-tier to split", "warn"); return; }
+    modal("Split — S-tier to split", "<p>Pick one of your S-tier towers.</p>",
+      sTowers.map(a => ({ label:a.name, close:true, onClick:() => {
+        const poolABC = s.pool.filter(x => towerTier(x) !== "S");
+        if (poolABC.length < 2) { toast("Not enough A/B/C in pool", "warn"); return; }
+        modal("Split — first result", "<p>Pick first A/B/C.</p>",
+          poolABC.map(p1 => ({ label:p1, close:true, onClick:() => {
+            modal("Split — second result", "<p>Pick a different A/B/C.</p>",
+              poolABC.filter(p2 => p2 !== p1).map(p2 => ({ label:p2, close:true, onClick:() => sendR({ target:a.id, pick1:p1, pick2:p2 }) })));
+          }})));
+      }})));
+    return;
+  } else { addOpt("Use", {}); }
+  if (!opts.length) { toast("No legal targets", "warn"); return; }
+  const title = promptR === r ? `Use ${r}` : `${r} → ${promptR}`;
+  const desc = promptR === r ? RULINGS[r].desc : `${r} copies <b>${esc(promptR)}</b>: ${esc(RULINGS[promptR].desc)}`;
+  const tipHtml = promptR === r ? `<p class="tip">💡 ${esc(RULINGS[r].tip)}</p>` : "";
+  modal(title, `<p>${desc}</p>${tipHtml}`, opts);
+}
+function renderHandoff() {
+  show("s-handoff");
+  const s = G.view;
+  const actor = s.mode === "offline" ? offlineActor() : G.mySeat;
+  const me = s.players[actor];
+  const opp = s.players[actor === "P1" ? "P2" : "P1"];
+  $("#handoffYour").innerHTML = towerNames(me).filter(Boolean).map(t => `<span class="tower">${esc(t)}</span>`).join("");
+  $("#handoffOpp").innerHTML = towerNames(opp).filter(Boolean).map(t => `<span class="tower">${esc(t)}</span>`).join("");
+  $("#handoffModeNote").textContent = s.mode === "online" ? (s.unranked ? "Online Unranked: no MMR change." : "Online (Unverified): honor-system reports. Does not affect official ranked MMR.") : "Offline (Casual): does not affect ranked MMR.";
+  $("#btnHandoffReady").disabled = me.ready;
+  $("#handoffStatus").textContent = `${s.players.P1.name}: ${s.players.P1.ready ? "✅" : "⏳"} · ${s.players.P2.name}: ${s.players.P2.ready ? "✅" : "⏳"}`;
+}
+function renderResult() {
+  show("s-result");
+  const s = G.view;
+  const actor = s.mode === "offline" ? offlineActor() : G.mySeat;
+  const me = s.players[actor];
+  const opp = s.players[actor === "P1" ? "P2" : "P1"];
+  $("#resultModeNote").textContent = s.mode === "online" ? (s.unranked ? "Online Unranked: no MMR change." : "Online (Unverified): honor-system reports. Does not affect official ranked MMR.") : "Offline (Casual): does not affect ranked MMR.";
+  $("#resultYour").textContent = towerNames(me).filter(Boolean).join(", ");
+  $("#resultOpp").textContent = towerNames(opp).filter(Boolean).join(", ");
+  $("#resultScore").textContent = `${draftedCount(s.players.P1)} - ${draftedCount(s.players.P2)} (informational)`;
+  $("#resultStatus").textContent = `${s.players.P1.name}: ${s.players.P1.result || "…"} · ${s.players.P2.name}: ${s.players.P2.result || "…"}`;
+  $$("#s-result button").forEach(b => b.disabled = !!me.result);
+  if (s.reportDeadline) startReportCountdown();
+}
+function computeDraftRecap(state) {
+  const seats = ["P1","P2"];
+  const result = {};
+  seats.forEach(seat => {
+    const p = state.players[seat];
+    const towers = p.towers.filter(t => t && t.name && !isFarm(t));
+    const sorted = towers.slice().sort((a, b) =>
+      (TIER_RANK[towerTier(b.name)] || 0) - (TIER_RANK[towerTier(a.name)] || 0));
+    const best = sorted[0] || null;
+    const worst = sorted[sorted.length - 1] || null;
+    const spent = (p.spent || []).filter(r => RULINGS[r]);
+    spent.sort((a, b) => RULINGS[b].cost - RULINGS[a].cost);
+    const bigPlay = spent[0] || null;
+    result[seat] = { best, worst, bigPlay };
+  });
+  return result;
+}
+function renderFinal() {
+  show("s-final");
+  const s = G.view;
+  const outcome = s.outcome || { type:"void" };
+  const box = $("#winnerBox");
+  const mmrBox = $("#mmrDelta");
+  const mySeat = G.mySeat;
+  let myResult;
+  if (outcome.type === "win") myResult = outcome.winner === mySeat ? "win" : "loss";
+  else if (outcome.type === "technical") myResult = "tech";
+  else myResult = "void";
+  if (!lastRecordedMatch || lastRecordedMatch.matchId !== s.matchId) {
+    lastRecordedMatch = { matchId: s.matchId, upd: Player.record(s.mode, myResult, 1000, s.unranked) };
+    if (myResult === "win") Sound.win();
+    else if (myResult === "loss") Sound.lose();
+  }
+  const upd = lastRecordedMatch.upd;
+  if (outcome.type === "win") {
+    const winner = s.players[outcome.winner];
+    const iWon = outcome.winner === mySeat;
+    box.innerHTML = `<div class="${iWon ? "win" : "loss"}">${iWon ? "Victory" : "Defeat"} — ${esc(winner.name)} wins</div>`;
+    if (s.mode === "online" && !s.unranked) {
+      mmrBox.innerHTML = `<div class="loadout"><div>${myResult === "win" ? "Win" : "Loss"} — <b>Provisional MMR</b> ${upd.before} → ${upd.after} (${upd.delta >= 0 ? "+" : ""}${upd.delta})${upd.promoted ? " · Up to " + esc(upd.afterTier) : ""}${upd.demoted ? " · Down to " + esc(upd.afterTier) : ""}</div></div>`;
+    } else if (s.unranked) {
+      mmrBox.innerHTML = `<div class="loadout muted" style="font-size:13px">Unranked match — no MMR change.</div>`;
+    } else {
+      mmrBox.innerHTML = `<div class="loadout muted" style="font-size:13px">Casual result recorded. Offline matches never affect ranked MMR.</div>`;
+    }
+  } else if (outcome.type === "technical") {
+    box.innerHTML = `<div class="muted">Technical — no MMR change.</div>`;
+    mmrBox.innerHTML = "";
+  } else {
+    box.innerHTML = `<div class="muted">Match voided${outcome.reason ? " — " + esc(outcome.reason) : ""}.</div>`;
+    mmrBox.innerHTML = "";
+  }
+  // Draft recap
+  const recap = computeDraftRecap(s);
+  const mine = recap[mySeat];
+  const theirs = recap[mySeat === "P1" ? "P2" : "P1"];
+  const recapLines = [];
+  if (mine.best)   recapLines.push(`🏆 <b>Your best pick:</b> ${esc(mine.best.name)}`);
+  if (mine.worst && mine.worst !== mine.best) recapLines.push(`⚠️ <b>Your weakest pick:</b> ${esc(mine.worst.name)}`);
+  if (mine.bigPlay) recapLines.push(`⚡ <b>Your biggest play:</b> ${esc(mine.bigPlay)}`);
+  if (theirs.best) recapLines.push(`👀 <b>Their best pick:</b> ${esc(theirs.best.name)}`);
+  if (theirs.bigPlay) recapLines.push(`💀 <b>Their biggest play:</b> ${esc(theirs.bigPlay)}`);
+  const recapBox = $("#draftRecapBox");
+  if (recapLines.length) {
+    recapBox.innerHTML = `<div class="loadout" style="font-size:13px;line-height:1.7;margin:16px 0"><b style="display:block;margin-bottom:6px">📋 Draft Recap</b>${recapLines.join("<br>")}</div>`;
+  } else {
+    recapBox.innerHTML = "";
+  }
+  $("#finalLog").innerHTML = s.log.map(l => `<div>${new Date(l.t).toLocaleTimeString()} — ${esc(l.msg)}</div>`).join("");
+}
+function offlineActor() {
+  const s = G.state;
+  if (!s) return "P1";
+  switch (s.phase) {
+    case "coin":
+      if (!s.coin.commits.P1) return "P1";
+      if (!s.coin.commits.P2) return "P2";
+      if (s.coin.winner && !s.firstPicker) return s.coin.winner;
+      return "P1";
+    case "config":
+      if (!s.players.P1.ready) return "P1";
+      if (!s.players.P2.ready) return "P2";
+      return "P1";
+    case "ban":
+      if (!s.players.P1.banChoice) return "P1";
+      if (!s.players.P2.banChoice) return "P2";
+      return "P1";
+    case "rulings":
+      if (!s.players.P1.locked) return "P1";
+      if (!s.players.P2.locked) return "P2";
+      return "P1";
+    case "draft": return s.turn;
+    case "handoff":
+      if (!s.players.P1.ready) return "P1";
+      if (!s.players.P2.ready) return "P2";
+      return "P1";
+    case "result":
+      if (!s.players.P1.result) return "P1";
+      if (!s.players.P2.result) return "P2";
+      return "P1";
+    default: return "P1";
+  }
+}
+function sendAction(action) {
+  if (!G.state) return;
+  const actor = G.state.mode === "offline" ? offlineActor() : G.mySeat;
+  if (G.state.mode === "offline") {
+    const res = applyAction(G.state, action, actor);
+    if (!res.ok) { Sound.error(); toast(res.error, "danger"); return; }
+    render();
+  } else {
+    if (G.isHost) {
+      const res = applyAction(G.state, action, actor);
+      if (!res.ok) { Sound.error(); toast(res.error, "danger"); return; }
+      broadcastState();
+      render();
+    } else {
+      if (!G.conn || !G.conn.open) { toast("Not connected", "danger"); return; }
+      G.conn.send({ type:"ACTION", action });
+    }
+  }
+}
+function sendChat(msg) {
+  if (!G.state || G.state.mode !== "online") return;
+  if (!msg) return;
+  if (G.isHost) {
+    const res = applyAction(G.state, { type:"ADD_CHAT", msg }, G.mySeat);
+    if (!res.ok) { if (res.error !== "Too fast") toast(res.error, "danger"); return; }
+    broadcastState();
+    render();
+  } else {
+    if (!G.conn || !G.conn.open) { toast("Not connected", "danger"); return; }
+    G.conn.send({ type:"ACTION", action:{ type:"ADD_CHAT", msg } });
+  }
+}
+function broadcastState() {
+  if (!G.state || !G.conn || !G.conn.open) return;
+  G.conn.send({ type:"STATE", state: redactFor(G.state, "P2") });
+}
+const PEER_AVAILABLE = typeof Peer !== "undefined";
+const METERED_APP_NAME = "towerbeetles";
+const METERED_API_KEY = "0GnMFSysPNHKRs5SLoJE_ZVtuc4PnSXkPTH-aFtpyZcoMeLO";
+const STUN_SERVERS = [
+  { urls:"stun:stun.l.google.com:19302" },
+  { urls:"stun:stun1.l.google.com:19302" }
+];
+const FALLBACK_TURN_SERVERS = [
+  { urls:"turn:openrelay.metered.ca:80", username:"openrelayproject", credential:"openrelayproject" },
+  { urls:"turn:openrelay.metered.ca:443", username:"openrelayproject", credential:"openrelayproject" },
+  { urls:"turn:openrelay.metered.ca:443?transport=tcp", username:"openrelayproject", credential:"openrelayproject" }
+];
+let cachedIceServers = null;
+let turnAvailable = false;
+async function getIceServers() {
+  if (cachedIceServers) return cachedIceServers;
+  const configured = METERED_APP_NAME && METERED_APP_NAME !== "YOUR_APP_NAME" &&
+                      METERED_API_KEY && METERED_API_KEY !== "YOUR_API_KEY";
+  if (!configured) { cachedIceServers = [...STUN_SERVERS, ...FALLBACK_TURN_SERVERS]; turnAvailable = true; return cachedIceServers; }
+  try {
+    const res = await fetch(`https://${METERED_APP_NAME}.metered.live/api/v1/turn/credentials?apiKey=${METERED_API_KEY}`);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const turnServers = await res.json();
+    if (!Array.isArray(turnServers) || !turnServers.length) throw new Error("Empty TURN list");
+    cachedIceServers = [...STUN_SERVERS, ...turnServers];
+    turnAvailable = true;
+  } catch (e) {
+    console.warn("Primary TURN fetch failed, using free fallback relay:", e);
+    cachedIceServers = [...STUN_SERVERS, ...FALLBACK_TURN_SERVERS];
+    turnAvailable = true;
+  }
+  return cachedIceServers;
+}
+function isSecureContextForOnline() {
+  const h = location.hostname;
+  return location.protocol === "https:" || h === "localhost" || h === "127.0.0.1" || location.protocol === "file:";
+}
+function checkHttpsForOnline() {
+  const hint = $("#onlineHint");
+  const btnCreate = $("#btnCreateOnline");
+  const btnJoin = $("#btnJoinOnline");
+  if (!hint || !btnCreate || !btnJoin) return;
+  if (!PEER_AVAILABLE) {
+    hint.innerHTML = '<span style="color:var(--red)">Online unavailable — peer script could not load.</span>';
+    btnCreate.disabled = true; btnJoin.disabled = true; return;
+  }
+  if (!isSecureContextForOnline()) {
+    hint.innerHTML = '<span style="color:var(--red)">Online requires HTTPS.</span>';
+    btnCreate.disabled = true; btnJoin.disabled = true; return;
+  }
+  hint.textContent = "Requires HTTPS and a stable connection. Refreshing disconnects you.";
+  btnCreate.disabled = false; btnJoin.disabled = false;
+}
+document.addEventListener("DOMContentLoaded", checkHttpsForOnline);
+function friendlyPeerError(e) {
+  const type = e && e.type;
+  if (type === "peer-unavailable") return "Room code not found.";
+  if (type === "network") return "Network error. Check your connection.";
+  if (type === "browser-incompatible") return "Browser not supported for online play.";
+  if (type === "disconnected") return "Disconnected from signaling server.";
+  if (type === "unavailable-id") return "Room code already in use. Try again.";
+  return "Connection error (" + String(type || "unknown") + ").";
+}
+function attachPeerLifecycle(peer) {
+  let reconnectAttempts = 0;
+  let reconnecting = false;
+  function setBadge(text) {
+    $("#connBadge").hidden = false;
+    $("#connBadge").textContent = text;
+  }
+  function tryReconnect() {
+    if (peer.destroyed || !peer.disconnected) return;
+    reconnectAttempts++;
+    if (reconnectAttempts > 6) {
+      toast("Couldn't reconnect to the server. Please start a new room.", "danger");
+      setBadge("Disconnected");
+      return;
+    }
+    setTimeout(() => {
+      if (peer.destroyed) return;
+      if (peer.disconnected) peer.reconnect();
+    }, Math.min(1000 * reconnectAttempts, 5000));
+  }
+  peer.on("disconnected", () => {
+    if (peer.destroyed) return;
+    reconnecting = true;
+    setBadge("Reconnecting…");
+    toast("Lost connection to the server — your room code may stop working. Reconnecting…", "warn");
+    tryReconnect();
+  });
+  peer.on("open", () => {
+    if (reconnecting) {
+      reconnecting = false;
+      reconnectAttempts = 0;
+      setBadge(G.conn && G.conn.open ? "Connected" : "Waiting…");
+      toast("Reconnected to the server.", "good");
+    }
+  });
+}
+async function createRoom() {
+  if (!PEER_AVAILABLE) { toast("Online unavailable.", "danger"); return; }
+  if (!isSecureContextForOnline()) { toast("Online requires HTTPS.", "danger"); return; }
+  if (G.peer) { try { G.peer.destroy(); } catch(e){} G.peer = null; }
+  const name = sanitizeName($("#myName").value, "Player");
+  const dt = $("#onlineDraftType") ? $("#onlineDraftType").value : "Open";
+  const unranked = $("#unrankedToggle") ? $("#unrankedToggle").checked : false;
+  G.mySeat = "P1"; G.isHost = true;
+  G.roomCode = randHex(2).toUpperCase() + Math.floor(Math.random()*90+10);
+  const iceServers = await getIceServers();
+  if (!turnAvailable) {
+    toast("Relay server unavailable — if your friend is on a different network or country, the connection may fail to establish.", "warn");
+  }
+  G.peer = new Peer("rf1-" + G.roomCode, { config: { iceServers } });
+  attachPeerLifecycle(G.peer);
+  G.peer.on("open", () => {
+    G.state = newState({ mode:"online", draftType:dt, p1name:name, p2name:"Opponent", unranked });
+    G.state.phase = "waiting";
+    G.state.matchId = G.roomCode;
+    render();
+    toast("Room created: " + G.roomCode, "good");
+  });
+  G.peer.on("connection", conn => {
+    if (G.conn && G.conn.open) { try { conn.close(); } catch(e){} return; }
+    G.conn = conn;
+    conn.on("open", () => {
+      $("#connBadge").hidden = false;
+      $("#connBadge").textContent = "Connected";
+      if (G.state.phase === "waiting") G.state.phase = "coin";
+      broadcastState();
+      render();
+    });
+    conn.on("data", data => {
+      if (!data || typeof data !== "object") return;
+      if (data.type === "ACTION") {
+        const res = applyAction(G.state, data.action, "P2");
+        if (!res.ok) { conn.send({ type:"ERROR", error:res.error }); return; }
+        broadcastState();
+        render();
+      } else if (data.type === "JOIN") {
+        const guestName = sanitizeName(data.name, "Opponent");
+        G.state.players.P2.name = dedupeName(guestName, G.state.players.P1.name);
+        broadcastState();
+        render();
+      }
+    });
+    conn.on("close", handleDisconnect);
+    conn.on("error", () => handleDisconnect());
+  });
+  G.peer.on("error", e => toast(friendlyPeerError(e), "danger"));
+}
+function handleDisconnect() {
+  $("#connBadge").textContent = "Disconnected";
+  $("#connBadge").hidden = false;
+  if (!G.state || G.state.phase === "final") return;
+  modal("Opponent disconnected", `<p>The connection was lost. This online match cannot continue.</p><p class="muted" style="font-size:13px">No MMR change is recorded for an unfinished match.</p>`,
+    [{ label:"Return to Setup", kind:"good", onClick:() => {
+      if (G.peer) { try { G.peer.destroy(); } catch(e){} G.peer = null; }
+      G.conn = null; G.state = null; G.view = null; render();
+    }}]);
+}
+async function joinRoom() {
+  if (!PEER_AVAILABLE) { toast("Online unavailable.", "danger"); return; }
+  if (!isSecureContextForOnline()) { toast("Online requires HTTPS.", "danger"); return; }
+  if (G.peer) { try { G.peer.destroy(); } catch(e){} G.peer = null; }
+  const name = sanitizeName($("#myName").value, "Player");
+  const code = $("#joinCode").value.trim().toUpperCase();
+  if (!code) { toast("Enter a code", "warn"); return; }
+  G.mySeat = "P2"; G.isHost = false; G.roomCode = code;
+  const iceServers = await getIceServers();
+  if (!turnAvailable) {
+    toast("Relay server unavailable — if the host is on a different network or country, the connection may fail to establish.", "warn");
+  }
+  G.peer = new Peer(undefined, { config: { iceServers } });
+  attachPeerLifecycle(G.peer);
+  G.peer.on("open", () => {
+    G.conn = G.peer.connect("rf1-" + code, { reliable:true });
+    G.conn.on("open", () => {
+      $("#connBadge").hidden = false;
+      $("#connBadge").textContent = "Connected";
+      G.conn.send({ type:"JOIN", name });
+      toast("Joined " + code, "good");
+    });
+    G.conn.on("data", data => {
+      if (!data || typeof data !== "object") return;
+      if (data.type === "STATE") { G.state = data.state; render(); }
+      else if (data.type === "ERROR") { Sound.error(); toast(data.error, "danger"); }
+    });
+    G.conn.on("close", handleDisconnect);
+    G.conn.on("error", () => handleDisconnect());
+  });
+  G.peer.on("error", e => toast(friendlyPeerError(e), "danger"));
+}
+$("#btnSound").onclick = () => {
+  const on = Sound.toggle();
+  $("#btnSound").textContent = on ? "🔊" : "🔇";
+  if (on) Sound.click();
+};
+$("#btnSound").textContent = Sound.enabled ? "🔊" : "🔇";
+document.addEventListener("click", function unlockOnce() {
+  Sound.unlock();
+  document.removeEventListener("click", unlockOnce);
+}, { once:true });
+$("#btnOffline").onclick = () => {
+  Sound.click();
+  const p1 = sanitizeName($("#p1name").value, "Blue");
+  let p2 = sanitizeName($("#p2name").value, "Red");
+  p2 = dedupeName(p2, p1);
+  G.state = newState({ mode:"offline", draftType:$("#draftType").value, p1name:p1, p2name:p2, unranked:false });
+  G.mySeat = "P1"; G.isHost = true;
+  rulingUndo = null;
+  rulingUndoSeq = null;
+  lastTurnKey = null;
+  render();
+};
+$("#btnCreateOnline").onclick = () => { Sound.click(); createRoom(); };
+$("#btnJoinOnline").onclick = () => { Sound.click(); joinRoom(); };
+$("#joinCode").addEventListener("keydown", e => { if (e.key === "Enter") joinRoom(); });
+$("#btnCopyCode").onclick = () => {
+  if (!G.roomCode) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(G.roomCode).then(() => toast("Copied", "good")).catch(() => toast("Copy failed", "warn"));
+  } else toast("Room code: " + G.roomCode, "good");
+};
+$("#btnCopyLink").onclick = () => {
+  const url = location.origin + location.pathname;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url + "?join=" + (G.roomCode || "")).then(() => toast("Link copied", "good")).catch(() => toast(url, "warn"));
+  } else toast(url, "good");
+};
+$("#btnCancelWait").onclick = () => {
+  if (G.peer) { try { G.peer.destroy(); } catch(e){} G.peer = null; }
+  G.conn = null; G.state = null; G.view = null;
+  render();
+};
+$("#btnFlip").onclick = () => {
+  Sound.coin();
+  const s = G.state;
+  if (!s) return;
+  if (s.mode === "offline") {
+    const sec1 = randHex(16);
+    const sec2 = randHex(16);
+    applyAction(G.state, { type:"COIN_COMMIT", hash: syncHash(sec1) }, "P1");
+    applyAction(G.state, { type:"COIN_COMMIT", hash: syncHash(sec2) }, "P2");
+    applyAction(G.state, { type:"COIN_REVEAL", secret: sec1 }, "P1");
+    applyAction(G.state, { type:"COIN_REVEAL", secret: sec2 }, "P2");
+    render();
+    return;
+  }
+  $("#btnFlip").hidden = true;
+  const secret = randHex(16);
+  sendAction({ type:"COIN_COMMIT", hash: syncHash(secret) });
+  sendAction({ type:"COIN_REVEAL", secret });
+};
+$$("#choiceBox button").forEach(b => { b.onclick = () => { Sound.click(); sendAction({ type:"COIN_CHOOSE", choice:b.dataset.choice }); }; });
+$("#btnConfirmConfig").onclick = () => { Sound.click(); sendAction({ type:"CONFIRM_CONFIG" }); };
+$("#btnUndo").onclick = () => { Sound.click(); sendAction({ type:"UNDO_RULING" }); };
+$("#btnReset").onclick = () => { Sound.click(); sendAction({ type:"RESET_RULING" }); };
+$("#btnLock").onclick = () => {
+  Sound.click();
+  const s = G.state;
+  if (!s) return;
+  const actor = s.mode === "offline" ? offlineActor() : G.mySeat;
+  const me = s.players[actor];
+  let cost = 0; for (const r of me.rulings) cost += RULINGS[r].cost;
+  modal("Lock portfolio?", `<p>You've selected <b>${me.rulings.length}</b> ruling(s) for <b>${cost}</b> points. This cannot be undone this match.</p>`, [
+    { label:"Lock in", kind:"good", onClick:() => sendAction({ type:"LOCK_RULING" }) },
+    { label:"Cancel", kind:"secondary", close:true }
+  ]);
+};
+$("#btnBeginDraft").onclick = () => { Sound.click(); sendAction({ type:"BEGIN_DRAFT" }); };
+$("#btnConcede").onclick = () => {
+  Sound.warn();
+  modal("Concede match?", "<p>You will record a <b>loss</b> and your opponent a <b>win</b>. MMR is affected. This cannot be undone.</p>",
+    [{ label:"Concede", kind:"danger", onClick:() => sendAction({ type:"CONCEDE" }) },
+     { label:"Cancel", kind:"secondary", close:true }]);
+};
+$("#btnAbort").onclick = () => {
+  Sound.warn();
+  modal("Abort match?", "<p>The match will be voided. No MMR change.</p>",
+    [{ label:"Abort", kind:"danger", onClick:() => sendAction({ type:"ABORT" }) },
+     { label:"Cancel", kind:"secondary", close:true }]);
+};
+$("#btnHandoffReady").onclick = () => { Sound.click(); sendAction({ type:"REPORT_READY" }); };
+$("#btnResultWin").onclick = () => { Sound.click(); sendAction({ type:"REPORT_RESULT", result:"win" }); };
+$("#btnResultLoss").onclick = () => { Sound.click(); sendAction({ type:"REPORT_RESULT", result:"loss" }); };
+$("#btnResultTech").onclick = () => { Sound.click(); sendAction({ type:"REPORT_RESULT", result:"tech" }); };
+$("#btnSendChat").onclick = () => {
+  const input = $("#chatInput");
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = "";
+  Sound.chat();
+  sendChat(msg);
+};
+$("#chatInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") { e.preventDefault(); $("#btnSendChat").click(); }
+});
+function fullReset() {
+  lastRecordedMatch = null;
+  lastRenderedPhase = null;
+  lastTurnKey = null;
+  rulingUndo = null;
+  rulingUndoSeq = null;
+  if (G.peer) { try { G.peer.destroy(); } catch(e){} G.peer = null; }
+  G.conn = null; G.state = null; G.view = null; G.roomCode = null;
+  $("#connBadge").hidden = true;
+  render();
+}
+$("#btnRematch").onclick = fullReset;
+$("#btnNewMatch").onclick = fullReset;
+$("#btnSaveBuild").onclick = () => {
+  Sound.click();
+  const s = G.state;
+  if (!s) return;
+  const actor = s.mode === "offline" ? offlineActor() : G.mySeat;
+  const me = s.players[actor];
+  if (!me.rulings.length) { toast("No rulings selected", "warn"); return; }
+  const name = prompt("Build name:", "Build " + (Builds.load().length + 1));
+  if (!name) return;
+  Builds.add(name, [...me.rulings]);
+  toast("Build saved", "good");
+};
+$("#btnLoadBuild").onclick = () => {
+  Sound.click();
+  const builds = Builds.load();
+  const rows = [];
+  STARTER_BUILDS.forEach(sb => {
+    rows.push({ label:`${sb.name} — ${sb.rulings.join(", ")}`, close:true, onClick:() => {
+      const v = Builds.validate(sb);
+      if (!v.ok) { toast("Invalid: " + v.reason, "danger"); return; }
+      sendAction({ type:"RESET_RULING" });
+      sb.rulings.forEach(r => sendAction({ type:"ADD_RULING", ruling:r }));
+    }});
+  });
+  builds.forEach(b => {
+    rows.push({ label:`${b.name} (${b.rulings.join(", ") || "empty"})`, close:true, onClick:() => {
+      const v = Builds.validate(b);
+      if (!v.ok) { toast("Invalid: " + v.reason, "danger"); return; }
+      sendAction({ type:"RESET_RULING" });
+      b.rulings.forEach(r => sendAction({ type:"ADD_RULING", ruling:r }));
+    }});
+  });
+  if (!rows.length) { toast("No builds available", "warn"); return; }
+  modal("Load Build", "<p>Starter builds are always available. Your saved builds follow.</p>", rows);
+};
+$("#btnQuickStart").onclick = () => {
+  Sound.click();
+  const s = G.state;
+  if (!s) return;
+  const actor = s.mode === "offline" ? offlineActor() : G.mySeat;
+  const me = s.players[actor];
+  if (me.locked) { toast("Portfolio already locked", "warn"); return; }
+  const starter = STARTER_BUILDS[0].rulings;
+  sendAction({ type:"RESET_RULING" });
+  starter.forEach(r => sendAction({ type:"ADD_RULING", ruling:r }));
+  toast("Starter loadout loaded — tweak or lock in", "good");
+};
+$("#btnProfile").onclick = () => {
+  Sound.click();
+  const p = Player.load();
+  const r = getRank(p.online.mmr);
+  modal("Profile", `
+    <div class="loadout">
+      <h3 style="margin-top:0">Offline (casual)</h3>
+      <div>W:${p.offline.wins} · L:${p.offline.losses} · Tech/Void:${p.offline.techVoid}</div>
+      <div>Matches: ${p.offline.matches}</div>
+    </div>
+    <div class="loadout">
+      <h3 style="margin-top:0">Online — Provisional MMR <span class="pill">Unverified</span></h3>
+      <div><b>${esc(r.icon)} ${esc(r.name)}</b> — ${p.online.mmr} MMR (peak ${p.online.peakMmr})</div>
+      <div>W:${p.online.wins} · L:${p.online.losses} · Tech/Void:${p.online.techVoid}</div>
+      <div>Streak: ${p.online.streak} (best ${p.online.bestStreak})</div>
+      <div>Matches: ${p.online.matches} · Placements left: ${p.online.placementsLeft}</div>
+      <div class="muted" style="font-size:12px;margin-top:4px">Honor-system reports. Locally tracked, unverified.</div>
+    </div>
+    <button class="danger" id="resetProfile">Reset Profile</button>
+  `, [{ label:"Close", kind:"secondary", close:true }]);
+  setTimeout(() => {
+    const rb = document.getElementById("resetProfile");
+    if (rb) rb.onclick = () => {
+      if (confirm("Reset local profile?")) {
+        Player.reset();
+        modal("Reset", "<p>Profile reset.</p>", [{ label:"OK", close:true }]);
+      }
+    };
+  }, 0);
+};
+$("#btnHelp").onclick = () => {
+  Sound.click();
+  modal("How to play — Ranked Flex 1.0.3", `
+    <ul style="padding-left:20px;font-size:14px">
+      <li><b>Ban phase:</b> each player bans 1 tower before rulings. Bans are permanent for the match.</li>
+      <li><b>Rulings:</b> 3 slots, 20 points. 50 rulings across Easy / Moderate / Hard / Insane / Curse tiers.</li>
+      <li><b>Draft 4 towers.</b> Farm is mandatory, auto-added, untargetable.</li>
+      <li><b>Open draft:</b> snake order — R1 P1→P2, R2 P2→P1, R3 P1→P2, R4 P2→P1.</li>
+      <li><b>Close draft:</b> 2 picks/turn × 2 turns each.</li>
+      <li><b>Keyboard:</b> press 1–0 to pick the first ten available towers; Esc closes any popup.</li>
+      <li><b>Removals:</b> max 1 per player (Evict/Steal/Delete/Plunder/Doom/Ruin/Purge).</li>
+      <li><b>Timers auto-resolve:</b> turn auto-passes at 0. Reports auto-resolve after 5 minutes.</li>
+      <li><b>Concede:</b> ends the match immediately as a loss for you. Uses ranked rules.</li>
+      <li><b>Unranked online:</b> toggle to play without MMR change.</li>
+      <li><b>Sound:</b> tap the speaker icon to toggle. Sounds generated in-browser.</li>
+    </ul>
+  `, [{ label:"Close", kind:"secondary", close:true }]);
+};
+(function autoJoin() {
+  try {
+    const params = new URLSearchParams(location.search);
+    const code = params.get("join");
+    if (code && code.length === 6) {
+      setTimeout(() => {
+        const el = $("#joinCode");
+        if (el) el.value = code;
+        toast("Room code filled in — tap Join Room", "good");
+      }, 500);
+    }
+  } catch(e) {}
+})();
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { $("#modalRoot").innerHTML = ""; return; }
+  if (!G.state || G.state.phase !== "draft") return;
+  if (e.target && e.target.matches && e.target.matches("input, textarea, select")) return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const n = e.key === "0" ? 10 : parseInt(e.key, 10);
+  if (n >= 1 && n <= 10) {
+    const btns = document.querySelectorAll("#towerGrid button:not(:disabled)");
+    if (btns[n - 1]) { e.preventDefault(); btns[n - 1].click(); }
+  }
+});
+setInterval(() => {
+  if (G.state && G.state.mode === "online" && G.isHost && G.state.phase !== "final") {
+    try { sessionStorage.setItem("rf_1_0_match", JSON.stringify({ matchId:G.state.matchId, phase:G.state.phase })); } catch(e){}
+  }
+}, 3000);
+window.addEventListener("beforeunload", (e) => {
+  if (G.state && G.state.mode === "online" && G.state.phase !== "final" && G.state.phase !== "landing" && G.state.phase !== "waiting") {
+    e.preventDefault();
+    e.returnValue = "Refreshing will disconnect you. Continue?";
+    return e.returnValue;
+  }
+});
+(function checkStale() {
+  try {
+    const raw = sessionStorage.getItem("rf_1_0_match");
+    if (raw) {
+      sessionStorage.removeItem("rf_1_0_match");
+      const snap = JSON.parse(raw);
+      if (snap && snap.phase && snap.phase !== "final") {
+        setTimeout(() => {
+          modal("Match state was lost", `<p>This page was refreshed during an online match.</p><p class="muted" style="font-size:13px">No MMR change was recorded.</p>`, [{ label:"OK", kind:"good", close:true }]);
+        }, 300);
+      }
+    }
+  } catch (e) {}
+})();
+render();
+</script>
+</body>
+</html>
